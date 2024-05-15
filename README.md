@@ -1,46 +1,41 @@
-# Getting Started with Create React App
+# Todoist Productivity Booster
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) TS template.
+Zest is a powerful React-based application that helps you increase your productivity by leveraging the Todoist API. This app provides a seamless user experience, allowing you to manage your tasks and projects more efficiently.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Todoist Integration**: Connect your Todoist account to access your tasks and projects directly within the application.
+- **Task Management**: Create, update, and complete tasks with ease, keeping your to-do list organized and up-to-date.
+- **Project Organization**: Manage your projects, including creating, editing, and deleting them, to better structure your workflow.
+- **Productivity Insights**: Gain valuable insights into your task completion rates and productivity trends, helping you identify areas for improvement.
+- **Material UI Design**: Enjoy a modern and intuitive user interface built with the Material UI library, providing a visually appealing and responsive experience.
+- **React Router Integration**: Navigate through the application seamlessly using React Router, enabling a smooth and efficient user experience.
+- **Redux State Management**: Leverage the power of Redux to manage the application state, ensuring a predictable and scalable data flow.
 
-### `npm start`
+## Technologies Used
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **React**: A powerful JavaScript library for building user interfaces.
+- **Redux**: A predictable state container for JavaScript applications.
+- **Material UI**: A popular React UI framework that provides a comprehensive set of components and tools.
+- **React Router**: A library that enables client-side routing in React applications.
+- **Todoist API**: The official API provided by Todoist, allowing integration with their task management platform.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Getting Started
 
-### `npm test`
+To get started with Todoist Productivity Booster, follow these steps:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository: `git clone https://github.com/your-username/todoist-productivity-booster.git`
+2. Install dependencies: `npm install`
+3. Configure the Todoist API credentials: Create a `.env` file in the root directory and add your Todoist API key.
+4. Start the development server: `npm start`
+5. Open the application in your browser: `http://localhost:3000`
 
-### `npm run build`
+## Contributing
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+We welcome contributions to Zest! If you would like to contribute, please follow these guidelines:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them.
+4. Push your changes to your fork.
+5. Submit a pull request, explaining the changes you've made.
