@@ -1,5 +1,5 @@
 import React, {ReactNode, useEffect, useState} from 'react';
-import {ThemeContextType} from "../types/theme-context-type";
+import {ThemeContextType} from "../../types/theme-context-type";
 import {createTheme, ThemeProvider as MUIThemeProvider } from "@mui/material/styles";
 
 export const ThemeContext = React.createContext<ThemeContextType | undefined>(undefined);
