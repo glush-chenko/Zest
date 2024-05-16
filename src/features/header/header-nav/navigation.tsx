@@ -1,6 +1,4 @@
-import React, {useContext} from "react";
-import {ThemeContextType} from "../../../types/theme-context-type";
-import {ThemeContext} from "../../../theme/context/theme-context"
+import React from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,16 +11,19 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import {FormControlLabel} from "@mui/material";
-import {StyledSwitch} from "../../../components/label/styles";
+import {FormControlLabel, useTheme} from "@mui/material";
+import {ThemeSwitch} from "../../../components/styled/theme-switch";
 import logo from "../../../assets/zest-logo.png"
 import logo2 from "../../../assets/zest-logo2.png"
+import {useAppDispatch} from "../../../app/hooks";
+import {toggleTheme} from "../../../theme/theme-provider/theme-provider-slice";
 
-const pages = ['Home', 'About', 'Ideas', 'Notes', 'Contact'];
-const settings = ['Profile', 'Progress', 'Dashboard'];
+const PAGES = ['Home', 'About', 'Ideas', 'Notes', 'Contact'];
+const SETTINGS = ['Profile', 'Progress', 'Dashboard'];
 
 export const Navigation = () => {
-    const {mode, toggleTheme} = useContext(ThemeContext) as ThemeContextType;
+    const theme = useTheme();
+    const dispatch = useAppDispatch();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -41,19 +42,23 @@ export const Navigation = () => {
         setAnchorElUser(null);
     };
 
+    const handleChangeTheme = () => {
+        dispatch(toggleTheme());
+    }
+
     return (
         <AppBar position="static">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Box
                         component="img"
-                        src={mode === "dark" ? logo : logo2}
+                        src={theme.palette.mode === "dark" ? logo : logo2}
                         alt="Logo"
-                        width="130px"
-                        height="50px"
+                        width="8rem"
+                        height="3rem"
                         sx={{
                             display: { xs: 'none', md: 'flex' },
-                            marginRight: '16px',
+                            marginRight: '1rem',
                         }}
                     >
                     </Box>
@@ -87,7 +92,7 @@ export const Navigation = () => {
                                 display: {xs: 'block', md: 'none'},
                             }}
                         >
-                            {pages.map((page) => (
+                            {PAGES.map((page) => (
                                 <MenuItem key={page} onClick={handleCloseNavMenu}>
                                     <Typography textAlign="center">{page}</Typography>
                                 </MenuItem>
@@ -113,7 +118,7 @@ export const Navigation = () => {
                         Zest
                     </Typography>
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        {pages.map((page) => (
+                        {PAGES.map((page) => (
                             <Button
                                 key={page}
                                 onClick={handleCloseNavMenu}
@@ -126,9 +131,9 @@ export const Navigation = () => {
 
                     <FormControlLabel
                         control={
-                            <StyledSwitch
-                                checked={mode === 'dark'}
-                                onChange={toggleTheme}
+                            <ThemeSwitch
+                                checked={theme.palette.mode === 'dark'}
+                                onChange={handleChangeTheme}
                                 name="theme-toggle"
                                 color="primary"
                             />
@@ -143,7 +148,7 @@ export const Navigation = () => {
                             </IconButton>
                         </Tooltip>
                         <Menu
-                            sx={{mt: '45px'}}
+                            sx={{mt: '3rem'}}
                             id="menu-appbar"
                             anchorEl={anchorElUser}
                             anchorOrigin={{
@@ -158,7 +163,7 @@ export const Navigation = () => {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
+                            {SETTINGS.map((setting) => (
                                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
                                     <Typography textAlign="center">{setting}</Typography>
                                 </MenuItem>
