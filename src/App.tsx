@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import {Root} from "./routes/root";
 import {HomePage} from "./pages/home/home-page";
-import {ThemeProvider} from "./theme/context/theme-context";
+import {ThemeProvider} from "./theme/theme-provider/theme-provider";
 import React from "react";
 
 const appRouter = createBrowserRouter(createRoutesFromElements(
