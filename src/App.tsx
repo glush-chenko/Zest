@@ -5,9 +5,10 @@ import {
   Route,
   RouterProvider,
 } from 'react-router-dom';
-import {ErrorPage} from "./error-page/error-page";
 import {Root} from "./routes/root";
 import {HomePage} from "./pages/home/home-page";
+import {ThemeProvider} from "./context/theme-context";
+import React from "react";
 
 const appRouter = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Root/>}>
@@ -17,16 +18,9 @@ const appRouter = createBrowserRouter(createRoutesFromElements(
 
 function App() {
   return (
-      // <Router >
-      //     <Routes>
-      //         <Route path="/" element={<ErrorPage />} />
-      //     </Routes>
-      // </Router>
-      // <div>
-      //     Hello!
-      // </div>
-
-      <RouterProvider router={appRouter} />
+      <ThemeProvider>
+          <RouterProvider router={appRouter} />
+      </ThemeProvider>
   );
 }
 

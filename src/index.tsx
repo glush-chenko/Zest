@@ -10,29 +10,14 @@ import { store } from './app/store';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import './index.css';
-import {ErrorPage} from "./error-page/error-page";
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 
-// const router = createBrowserRouter([
-//     {
-//         path: "/",
-//         element:<App />,
-//         errorElement: <ErrorPage />,
-//     },
-// ]);
-
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-        {/*<RouterProvider router={router} />*/}
-        {/*<BrowserRouter >*/}
             <App />
-        {/*</BrowserRouter >*/}
-        {/*<Router >*/}
-        {/*    <Route path="/" element={<App />} />*/}
-        {/*</Router>*/}
     </Provider>
   </React.StrictMode>
 );
