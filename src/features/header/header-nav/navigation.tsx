@@ -20,6 +20,7 @@ import {toggleTheme} from "../../../theme/theme-provider/theme-provider-slice";
 import {AppBar} from "../../../components/styled/app-bar";
 import {LeftSection} from "../../main/left-section/left-section";
 import {selectDrawerOpen} from "../../main/left-section/left-section-slice";
+import {RightSection} from "../../main/right-section/right-section";
 
 const PAGES = ['Home', 'About', 'Ideas', 'Notes', 'Contact'];
 const SETTINGS = ['Profile', 'Progress', 'Dashboard'];
@@ -143,6 +144,7 @@ export const Navigation = () => {
                     </Box>
                 </Toolbar>
             </Container>
+            <RightSection />
         </AppBar>
     )
 }

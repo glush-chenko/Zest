@@ -12,10 +12,24 @@ export const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 
         ...(open && {
             ...openedMixin(theme),
             '& .MuiDrawer-paper': openedMixin(theme),
+            '& ::-webkit-scrollbar': {
+                width: '0.6rem',
+            },
+            '& ::-webkit-scrollbar-thumb': {
+                backgroundColor: theme.palette.grey[500],
+                borderRadius: '4px',
+            },
         }),
         ...(!open && {
             ...closedMixin(theme),
             '& .MuiDrawer-paper': closedMixin(theme),
+            '& ::-webkit-scrollbar': {
+                width: '0.5rem',
+            },
+            '& ::-webkit-scrollbar-thumb': {
+                backgroundColor: theme.palette.grey[500],
+                borderRadius: '4px',
+            },
         }),
     }),
 );
