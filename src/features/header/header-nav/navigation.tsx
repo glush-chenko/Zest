@@ -1,5 +1,5 @@
 import React from "react";
-import AppBar from '@mui/material/AppBar';
+// import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -15,8 +15,11 @@ import {FormControlLabel, useTheme} from "@mui/material";
 import {ThemeSwitch} from "../../../components/styled/theme-switch";
 import logo from "../../../assets/zest-logo.png"
 import logo2 from "../../../assets/zest-logo2.png"
-import {useAppDispatch} from "../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {toggleTheme} from "../../../theme/theme-provider/theme-provider-slice";
+import {AppBar} from "../../../components/styled/app-bar";
+import {LeftSection} from "../../main/left-section/left-section";
+import {selectDrawerOpen} from "../../main/left-section/left-section-slice";
 
 const PAGES = ['Home', 'About', 'Ideas', 'Notes', 'Contact'];
 const SETTINGS = ['Profile', 'Progress', 'Dashboard'];
@@ -24,8 +27,10 @@ const SETTINGS = ['Profile', 'Progress', 'Dashboard'];
 export const Navigation = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
+    const drawer = useAppSelector(selectDrawerOpen);
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -47,9 +52,10 @@ export const Navigation = () => {
     }
 
     return (
-        <AppBar position="static">
+        <AppBar position="static" open={drawer}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
+                    <LeftSection />
                     <Box
                         component="img"
                         src={theme.palette.mode === "dark" ? logo : logo2}
@@ -63,42 +69,7 @@ export const Navigation = () => {
                     >
                     </Box>
 
-                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}>
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="menu-appbar"
-                            aria-haspopup="true"
-                            onClick={handleOpenNavMenu}
-                            color="inherit"
-                        >
-                            <MenuIcon/>
-                        </IconButton>
-                        <Menu
-                            id="menu-appbar"
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'left',
-                            }}
-                            open={Boolean(anchorElNav)}
-                            onClose={handleCloseNavMenu}
-                            sx={{
-                                display: {xs: 'block', md: 'none'},
-                            }}
-                        >
-                            {PAGES.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign="center">{page}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    </Box>
+                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}} />
                     <Typography
                         variant="h5"
                         noWrap
@@ -121,7 +92,7 @@ export const Navigation = () => {
                         {PAGES.map((page) => (
                             <Button
                                 key={page}
-                                onClick={handleCloseNavMenu}
+                                // onClick={}
                                 sx={{my: 2, color: 'white', display: 'block'}}
                             >
                                 {page}
