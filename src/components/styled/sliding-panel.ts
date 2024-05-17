@@ -3,6 +3,7 @@ import {DRAWER_WIDTH} from "./drawer";
 
 export const openedMixin = (theme: Theme): CSSObject => ({
     width: DRAWER_WIDTH,
+    overflowY: 'auto',
     transition: theme.transitions.create('width', {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.enteringScreen,
@@ -15,6 +16,7 @@ export const closedMixin = (theme: Theme): CSSObject => ({
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
     }),
+    overflowY: 'auto',
     overflowX: 'hidden',
     width: `calc(${theme.spacing(7)} + 1px)`,
     [theme.breakpoints.up('sm')]: {
