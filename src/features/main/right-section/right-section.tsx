@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import {useTheme} from "@mui/material";
+import {TabsRightSection} from "../../../components/styled/tabs-right-section";
+import {TabRightSection} from "../../../components/styled/tab-right-section";
 
 // const useStyles = makeStyles((theme: Theme) => ({
 //     root: {
@@ -31,49 +34,33 @@ export const RightSection = () => {
     return (
         <Box sx={{
             display: 'flex',
-            height: '100vh',
             width: '4rem',
-            backgroundColor: theme.palette.mode === 'dark' ? "black" : "#f5f4f4f7",
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.common.black : "#f5f4f4f7",
             position: 'fixed',
             top: 0,
             right: 0,
             bottom: 0,
             left: 'auto',
         }}>
-            <Tabs
+            <TabsRightSection
                 orientation="vertical"
                 variant="scrollable"
                 value={value}
-                scrollButtons={false}
+                scrollButtons="auto"
                 onChange={handleChange}
                 aria-label="scrollable prevent tabs"
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    '& .MuiTabs-indicator': {
-                        left: 0,
-                        right: 'auto',
-                        backgroundColor: theme.palette.secondary.dark,
-                        width: "0.3rem",
-                    },
-                    '& .MuiTabs-scroller': {
-                        position: "static",
-                        display: "flex",
-                        alignItems: "center",
-                    },
-                    '& .MuiTab-root': {
-                        height: "7.5rem",
-                    },
-                }}
             >
-                <Tab label="Mon" />
-                <Tab label="Tue" />
-                <Tab label="Wed" />
-                <Tab label="Thu" />
-                <Tab label="Fri" />
-                <Tab label="Sat" />
-                <Tab label="Sun" />
-            </Tabs>
+                <TabRightSection label="Mon" />
+                <TabRightSection label="Tue" />
+                <TabRightSection label="Wed" />
+                <TabRightSection label="Thu" />
+                <TabRightSection label="Fri" />
+                <TabRightSection label="Sat" />
+                <TabRightSection label="Sun" />
+            </TabsRightSection>
+            {/*<Box flex={1} p={4}>*/}
+            {/*    <Typography variant="h4">Content for the selected tab</Typography>*/}
+            {/*</Box>*/}
             {/*<Box>*/}
             {/*    {value === 0 && (*/}
             {/*        <Box>*/}

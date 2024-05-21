@@ -13,7 +13,7 @@ import {Drawer} from "../../../components/styled/drawer";
 import {DrawerHeader} from '../../../components/styled/drawer-header';
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {selectDrawerOpen, toggleDrawer} from "./left-section-slice";
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import AutorenewOutlinedIcon from '@mui/icons-material/AutorenewOutlined';
 import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
