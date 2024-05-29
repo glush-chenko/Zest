@@ -36,9 +36,14 @@ export const ThemeProvider = ({ children }: {children: ReactNode}) => {
             mode,
             primary: {
                 main: '#9ed079',
+                // contrastText: "#fff",
             },
             secondary: {
-                main: '#a276d8',
+                main: mode === "light" ? '#eabe50' : "#a276d8",
+                contrastText: "#000"
+            },
+            text: {
+                primary: mode === "light" ? "#000" : "#fff"
             },
             themeSwitch: {
                 darkTrack: '#8796A5',

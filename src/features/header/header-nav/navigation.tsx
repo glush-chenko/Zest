@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback} from "react";
 // import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -21,32 +21,39 @@ import {AppBar} from "../../../components/styled/app-bar";
 import {LeftSection} from "../../main/left-section/left-section";
 import {selectDrawerOpen} from "../../main/left-section/left-section-slice";
 import {RightSection} from "../../main/right-section/right-section";
+import {NavLink} from "react-router-dom";
+import {selectHeader, toggleHeaderProfile} from "../header-slice";
 
-const PAGES = ['Home', 'About', 'Ideas', 'Notes', 'Contact'];
+const PAGES = ['tasks', 'about', 'ideas', 'contact'];
 const SETTINGS = ['Profile', 'Progress', 'Dashboard'];
 
 export const Navigation = () => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
     const drawer = useAppSelector(selectDrawerOpen);
-    const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+    const {src} = useAppSelector(selectHeader);
+    // const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
-
-    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElNav(event.currentTarget);
-    };
-    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    // const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    //     setAnchorElNav(event.currentTarget);
+    // };
+    const handleOpenUserMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
-    };
+        dispatch(toggleHeaderProfile(false));
+    }, [dispatch]);
 
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
-    };
+    // const handleCloseNavMenu = () => {
+    //     setAnchorElNav(null);
+    // };
 
-    const handleCloseUserMenu = () => {
+    const handleCloseUserMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
+        const text = (event.target as HTMLElement).textContent;
+        if (text === "Profile") {
+            dispatch(toggleHeaderProfile(true));
+        }
         setAnchorElUser(null);
-    };
+    }, [dispatch]);
 
     const handleChangeTheme = () => {
         dispatch(toggleTheme());
@@ -56,7 +63,6 @@ export const Navigation = () => {
         <AppBar position="static" open={drawer}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <LeftSection />
                     <Box
                         component="img"
                         src={theme.palette.mode === "dark" ? logo : logo2}
@@ -64,13 +70,13 @@ export const Navigation = () => {
                         width="8rem"
                         height="3rem"
                         sx={{
-                            display: { xs: 'none', md: 'flex' },
+                            display: {xs: 'none', md: 'flex'},
                             marginRight: '1rem',
                         }}
                     >
                     </Box>
 
-                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}} />
+                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}/>
                     <Typography
                         variant="h5"
                         noWrap
@@ -89,15 +95,28 @@ export const Navigation = () => {
                     >
                         Zest
                     </Typography>
+
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        {PAGES.map((page) => (
-                            <Button
-                                key={page}
-                                // onClick={}
-                                sx={{my: 2, color: 'white', display: 'block', margin: 0}}
-                            >
-                                {page}
+                        <NavLink to="/" style={{textDecoration: 'none'}}>
+                            <Button sx={{my: 2, color: 'white', display: 'block', margin: 0}}>
+                                Home
                             </Button>
+                        </NavLink>
+                        {PAGES.map((page) => (
+                            <NavLink
+                                to={`/${page}`}
+                                style={{
+                                    textDecoration: 'none',
+                                }}
+                                key={`navigation-link-${page}`}
+                            >
+                                <Button
+                                    // onClick={}
+                                    sx={{my: 2, color: 'white', display: 'block', margin: 0}}
+                                >
+                                    {page}
+                                </Button>
+                            </NavLink>
                         ))}
                     </Box>
 
@@ -116,12 +135,11 @@ export const Navigation = () => {
                     <Box sx={{flexGrow: 0}}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg"/>
+                                <Avatar src={src}/>
                             </IconButton>
                         </Tooltip>
                         <Menu
                             sx={{mt: '3rem'}}
-                            id="menu-appbar"
                             anchorEl={anchorElUser}
                             anchorOrigin={{
                                 vertical: 'top',
@@ -135,8 +153,10 @@ export const Navigation = () => {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {SETTINGS.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                            {SETTINGS.map((setting, index) => (
+                                <MenuItem
+                                    key={index}
+                                    onClick={handleCloseUserMenu}>
                                     <Typography textAlign="center">{setting}</Typography>
                                 </MenuItem>
                             ))}
@@ -144,7 +164,6 @@ export const Navigation = () => {
                     </Box>
                 </Toolbar>
             </Container>
-            <RightSection />
         </AppBar>
     )
 }
