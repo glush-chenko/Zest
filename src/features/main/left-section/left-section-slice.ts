@@ -2,7 +2,8 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "../../../app/store";
 
 export interface LeftSectionState {
-    open: boolean
+    open: boolean;
+
 }
 
 const initialState: LeftSectionState = {

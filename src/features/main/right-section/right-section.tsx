@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect} from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import {useTheme} from "@mui/material";
-import {TabsRightSection} from "../../../components/styled/tabs-right-section";
-import {TabRightSection} from "../../../components/styled/tab-right-section";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {getWeekDates} from "../../../utils/get-week-dates";
+import dayjs from "dayjs";
+import {selectValueCalendarDay, setDayOfWeek, updateValue} from './right-section-slice';
 
 // const useStyles = makeStyles((theme: Theme) => ({
 //     root: {
@@ -24,40 +25,96 @@ import {TabRightSection} from "../../../components/styled/tab-right-section";
 // }));
 
 export const RightSection = () => {
+    const dispatch = useAppDispatch();
     const theme = useTheme();
-    const [value, setValue] = useState(0);
+    // const [value, setValue] = useState(0);
+    const {dayOfWeek} = useAppSelector(selectValueCalendarDay);
+    // const selectedDate =  useAppSelector(selectDate);
+    // const dayOfWeek = selectedDate && selectedDate.day();
+    const weekDates = getWeekDates();
+
+    useEffect(() => {
+        // setValue(dayjs().day());
+        dispatch(setDayOfWeek(dayjs().day()));
+        // dispatch(dayjs().day());
+    }, [dispatch]);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setValue(newValue);
+        // setValue(newValue);
+        // console.log(weekDates[newValue].format('MM-DD'))
+        dispatch(setDayOfWeek(newValue));
+        dispatch(updateValue(weekDates[newValue].format('MM-DD')));
     };
 
     return (
         <Box sx={{
             display: 'flex',
             width: '4rem',
-            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.common.black : "#f5f4f4f7",
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
+            backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
             left: 'auto',
+            position: "relative",
+            borderLeft: `1px solid ${theme.palette.divider}`
         }}>
-            <TabsRightSection
+            <Tabs
                 orientation="vertical"
                 variant="scrollable"
-                value={value}
+                value={dayOfWeek}
                 scrollButtons="auto"
                 onChange={handleChange}
                 aria-label="scrollable prevent tabs"
+                sx={{
+                    display: "flex",
+                    flexDirection: 'column',
+                    alignItems: "center",
+                    '& .MuiTabs-indicator': {
+                        left: 0,
+                        width: "0.3rem",
+                    },
+                    '& .MuiTabs-scroller': {
+                        position: "static",
+                        display: "flex",
+                        alignItems: "center",
+                    },
+                    "& .MuiTabs-flexContainer": {
+                        height: "100%",
+                    },
+                    "& .MuiTab-root": {
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        flexGrow: 1,
+                        padding: theme.spacing(2),
+                        minHeight: 'auto',
+                        '& .Mui-selected': {
+                            fontWeight: theme.typography.fontWeightBold,
+                        },
+                    }
+                }}
             >
-                <TabRightSection label="Mon" />
-                <TabRightSection label="Tue" />
-                <TabRightSection label="Wed" />
-                <TabRightSection label="Thu" />
-                <TabRightSection label="Fri" />
-                <TabRightSection label="Sat" />
-                <TabRightSection label="Sun" />
-            </TabsRightSection>
+                {weekDates.map((date, index) => (
+                    <Tab
+                        key={index}
+                        label={
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: "1rem"
+                            }}>
+                                <span>{date?.format('ddd')}</span>
+                                <span>{date?.format('D')}</span>
+                            </Box>
+                        }
+                    />
+                ))}
+                {/*<Tab label={`Mon`} />*/}
+                {/*<Tab label="Tue" />*/}
+                {/*<Tab label="Wed" />*/}
+                {/*<Tab label="Thu" />*/}
+                {/*<Tab label="Fri" />*/}
+                {/*<Tab label="Sat" />*/}
+                {/*<Tab label="Sun" />*/}
+            </Tabs>
             {/*<Box flex={1} p={4}>*/}
             {/*    <Typography variant="h4">Content for the selected tab</Typography>*/}
             {/*</Box>*/}

@@ -7,7 +7,7 @@ export const ErrorPage = () => {
 
     if (error instanceof Error) {
         return (
-            <div id="error-page">
+            <div >
                 <h1>Oops!</h1>
                 <p>Sorry, an unexpected error has occurred.</p>
                 <p>
@@ -17,7 +17,7 @@ export const ErrorPage = () => {
         )
     } else if (typeof error === 'object' && error !== null) {
         return (
-            <div id="error-page">
+            <div>
                 <h1>Oops!</h1>
                 <p>Sorry, an unexpected error has occurred.</p>
                 <p>
@@ -31,7 +31,7 @@ export const ErrorPage = () => {
         )
     } else {
         return (
-            <div id="error-page">
+            <div>
                 <h1>Oops!</h1>
                 <p>Sorry, an unexpected error has occurred.</p>
                 <p>
