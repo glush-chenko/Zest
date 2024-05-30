@@ -9,11 +9,14 @@ import DialogContent from "@mui/material/DialogContent";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {selectTask, selectTasks, toggleTaskCreator} from "../task-slice";
 import {useNavigate} from "react-router-dom";
+import DialogContentText from "@mui/material/DialogContentText";
+import TextField from "@mui/material/TextField";
+import {TaskCardEdit} from "../task-cards-list/task-card-edit/task-card-edit";
 
 export const TaskEditModal = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {name, description, isTaskCreatorOpen, tasks, selectedTask} = useAppSelector(selectTasks);
+    const {name, description, tasks, selectedTask} = useAppSelector(selectTasks);
 
     const handleClose = useCallback(() => {
         dispatch(toggleTaskCreator(false));
@@ -23,7 +26,7 @@ export const TaskEditModal = () => {
 
     return (
         <Dialog
-            open={isTaskCreatorOpen}
+            open={!!selectedTask}
             onClose={handleClose}
             fullWidth={true}
             maxWidth="sm"
@@ -35,12 +38,19 @@ export const TaskEditModal = () => {
                 },
             }}
         >
-            <DialogTitle>Task</DialogTitle>
+            {/*<DialogTitle>Task</DialogTitle>*/}
 
             <DialogContent
-                sx={{display: "flex", flexDirection: "row", gap: "5rem", padding: "0 3rem"}}
+                sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "5rem",
+                    justifyContent: "center",
+                    // padding: "0 3rem"
+            }}
             >
-                {selectedTask && <TaskCard task={selectedTask} />}
+                <TaskCardEdit selected={selectedTask}/>
+
             </DialogContent>
         </Dialog>
     );

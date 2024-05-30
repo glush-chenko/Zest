@@ -3,9 +3,11 @@ import Typography from "@mui/material/Typography";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Stepper from "@mui/material/Stepper";
-import {isStepOptional, STEPS} from "../task";
+import {isStepOptional} from "../task";
 import {useAppSelector} from "../../../app/hooks";
 import {selectTasks} from "../task-slice";
+
+export const STEPS = ['Describe the name of the task', 'Description, if required', 'Period of execution'];
 
 export const TaskStepper = () => {
     const {currentStep, skipped} = useAppSelector(selectTasks);

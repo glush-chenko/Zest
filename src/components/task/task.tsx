@@ -10,8 +10,6 @@ import {TaskCardsList} from "./task-cards-list/task-cards-list";
 import {TaskNameTextField} from "./task-name-text-field/task-name-text-field";
 import {TaskStepper} from "./task-stepper/task-stepper";
 
-export const STEPS = ['Describe the name of the task', 'Description, if required', 'Period of execution'];
-
 export const isStepOptional = (step: number) => {
     return step === 1 || step === 2;
 };

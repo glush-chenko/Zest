@@ -5,38 +5,18 @@ import Box from '@mui/material/Box';
 import {useTheme} from "@mui/material";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {getWeekDates} from "../../../utils/get-week-dates";
-import dayjs from "dayjs";
 import {selectValueCalendarDay, setDayOfWeek, updateValue} from './right-section-slice';
-
-// const useStyles = makeStyles((theme: Theme) => ({
-//     root: {
-//         display: 'flex',
-//         height: '100vh',
-//         width: '300px',
-//         backgroundColor: theme.palette.grey[200],
-//     },
-//     tabs: {
-//         borderRight: `1px solid ${theme.palette.divider}`,
-//     },
-//     tabContent: {
-//         flexGrow: 1,
-//         padding: theme.spacing(3),
-//     },
-// }));
 
 export const RightSection = () => {
     const dispatch = useAppDispatch();
     const theme = useTheme();
     // const [value, setValue] = useState(0);
     const {dayOfWeek} = useAppSelector(selectValueCalendarDay);
-    // const selectedDate =  useAppSelector(selectDate);
-    // const dayOfWeek = selectedDate && selectedDate.day();
     const weekDates = getWeekDates();
 
     useEffect(() => {
-        // setValue(dayjs().day());
-        dispatch(setDayOfWeek(dayjs().day()));
-        // dispatch(dayjs().day());
+        const day = new Date().getDay();
+        dispatch(setDayOfWeek((day + 6) % 7));
     }, [dispatch]);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {

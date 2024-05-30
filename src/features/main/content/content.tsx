@@ -42,7 +42,7 @@ export const Content = () => {
             justifyContent:  location.pathname === "/tasks" ? 'flex-start' : "center",
             backgroundColor: theme.palette.background.default,
             flex: 1,
-            padding: "2rem",
+            padding: "1rem 4rem",
         }}>
             {open && <HeaderModalProfile />}
             {isTaskCreatorOpen && <TaskModal/>}

@@ -1,7 +1,7 @@
 import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from "../../app/store";
 import dayjs, {Dayjs} from 'dayjs';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 export interface Task {
     id: string;
@@ -45,12 +45,56 @@ const taskSlice = createSlice({
     name: "task",
     initialState,
     reducers: {
-        updateField: (state, action: PayloadAction<{ step: number; value: string }>) => {
+        updateField: (state, action: PayloadAction<{ step?: number; name: string; description?: string; scheduledDate?: string }>) => {
             if (action.payload.step === 0) {
-                state.name = action.payload.value;
+                state.name = action.payload.name;
+            } else if (action.payload.step) {
+                state.description = action.payload.name;
             } else {
-                state.description = action.payload.value;
+                if (state.selectedTask) {
+                    if (action.payload.description) {
+                        state.selectedTask.description = action.payload.description;
+                    }
+                    if (action.payload.name) {
+                        state.selectedTask.name = action.payload.name;
+                    }
+                    if (action.payload.scheduledDate) {
+                        state.selectedTask.scheduledDate = action.payload.scheduledDate;
+                    }
+                }
             }
+        },
+        updateTask: (state, action: PayloadAction<{
+            id: string | null,
+            name?: string | null,
+            description?: string | null,
+            scheduledDate?: string | null
+        }>) => {
+            // const editTask = {
+            //     id: action.payload.id,
+            //     name: action.payload.name,
+            //     description: action.payload.description,
+            //     completed: false,
+            //     scheduledDate: action.payload.scheduledDate,
+            // }
+
+            const {name, description, scheduledDate } = action.payload;
+
+            const updatedTasks = state.tasks.map(task => {
+                if (task.id === action.payload.id) {
+                    return {
+                        ...task,
+                        name: name ?? task.name,
+                        description: description ?? task.description,
+                        scheduledDate: scheduledDate ?? task.scheduledDate,
+                    };
+                }
+                return task;
+            });
+            state.tasks = updatedTasks;
+
+            localStorage.removeItem('tasks');
+            localStorage.setItem('tasks', JSON.stringify(updatedTasks));
         },
         nextStep: (state) => {
             state.currentStep = state.currentStep + 1;
@@ -63,7 +107,7 @@ const taskSlice = createSlice({
             state.name = "";
             state.description = "";
         },
-        addTask: (state, action : PayloadAction<{scheduledDate: string}>) => {
+        addTask: (state, action: PayloadAction<{ scheduledDate: string }>) => {
             const newTask: Task = {
                 id: uuidv4(),
                 name: state.name,
@@ -85,7 +129,7 @@ const taskSlice = createSlice({
         completeTask: (state, action: PayloadAction<string>) => {
             const taskIndex = state.tasks.findIndex((task) => task.id === action.payload);
             if (taskIndex !== -1) {
-                const completedTask = { ...state.tasks[taskIndex], completed: true };
+                const completedTask = {...state.tasks[taskIndex], completed: true};
                 state.completedTasks.push(completedTask);
                 state.tasks.splice(taskIndex, 1);
                 localStorage.setItem('tasks', JSON.stringify(state.tasks));
@@ -159,6 +203,7 @@ export const {
     selectTask,
     toggleTaskCreator,
     setTempScheduledDate,
+    updateTask,
     // setSelectedDate,
     // filterTasksByDate,
     // updateScheduledDate,

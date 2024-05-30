@@ -1,10 +1,9 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {useAppSelector} from "../../../app/hooks";
 import {selectTasks} from "../task-slice";
 import {TaskCard} from "./task-card/task-card";
-import dayjs from "dayjs";
 import {selectValueCalendarDay} from "../../../features/main/right-section/right-section-slice";
 import {getWeekDates} from "../../../utils/get-week-dates";
 
@@ -25,7 +24,7 @@ export const TaskCardsList = () => {
                 padding: "1rem 0"
             }}>
                 <Typography variant="h6" gutterBottom sx={{fontWeight: "bold"}}>
-                    Tasks for {`${weekDates[dayOfWeek]}`}
+                    Tasks for {`${weekDates[dayOfWeek].format("ddd, DD MMM YYYY")}`}
                 </Typography>
                 {/*{tasks.map((task) => (*/}
                 {/*    <Box key={task.id}>*/}

@@ -17,7 +17,7 @@ export const rightSectionSlice = createSlice({
     initialState,
     reducers: {
         setDayOfWeek: (state, action: PayloadAction<number>) => {
-            state.dayOfWeek = action.payload;
+            state.dayOfWeek = action.payload
         },
         updateValue: (state, action: PayloadAction<string>) => {
             state.valueCalendarDay = action.payload;
