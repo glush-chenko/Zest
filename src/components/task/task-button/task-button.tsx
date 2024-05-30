@@ -1,7 +1,7 @@
 import React, {useCallback, useMemo} from "react";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import {isStepOptional, STEPS} from "../task";
+import {isStepOptional} from "../task";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {
     addSkippedStep,
@@ -14,12 +14,12 @@ import {
     unskipStep
 } from "../task-slice";
 import {useNavigate} from "react-router-dom";
-import dayjs from "dayjs";
+import {STEPS} from "../task-stepper/task-stepper";
 
 export const TaskButton = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {name, description, currentStep, skipped, tempScheduledDate} = useAppSelector(selectTasks);
+    const {name, currentStep, skipped, tempScheduledDate} = useAppSelector(selectTasks);
 
     const isStepSkipped = (step: number) => {
         return skipped.includes(step);
@@ -31,18 +31,18 @@ export const TaskButton = () => {
 
     const handleSkip = useCallback(() => {
         if (!isStepOptional(currentStep)) {
-            throw new Error("You can't skip a step that isn't optional.");
+            // snackbar
+        } else {
+            dispatch(nextStep());
+            dispatch(addSkippedStep(currentStep))
         }
-
-        dispatch(nextStep());
-        dispatch(addSkippedStep(currentStep))
     }, [dispatch, currentStep]);
 
     const handleAddTask = useCallback(() => {
         dispatch(addTask({scheduledDate: tempScheduledDate}));
         dispatch(resetStep());
         dispatch(toggleTaskCreator(false));
-        dispatch(setTempScheduledDate(''));
+        dispatch(setTempScheduledDate(""));
         navigate('/tasks');
     }, [dispatch, tempScheduledDate]);
 

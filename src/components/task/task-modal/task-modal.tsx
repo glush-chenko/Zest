@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {selectTasks, toggleTaskCreator, selectTask} from "../task-slice";
+import {selectTasks, toggleTaskCreator, selectTask, resetStep} from "../task-slice";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -19,22 +19,14 @@ export const TaskModal = () => {
     const location = useLocation();
     const {taskId} = useParams<{ taskId?: string }>();
     const {name, description, isTaskCreatorOpen, tasks, selectedTask} = useAppSelector(selectTasks);
-    // const [selected, setSelected] = React.useState(false);
-
-    // useEffect(() => {
-    //     if (selectedTask) {
-    //         setSelected(true)
-    //         // dispatch(toggleTaskCreator(true));
-    //     }
-    // }, [selectedTask]);
 
     const handleClose = useCallback(() => {
-        // dispatch(toggleTaskCreator(false));
+        dispatch(toggleTaskCreator(false));
         // dispatch(openSelectTask(false));
         dispatch(selectTask(null));
-        // setSelected(false);
-        // tasks.length ? navigate('/tasks') : navigate('/');
-    }, [dispatch]);
+        tasks.length ? navigate('/tasks') : navigate('/');
+        dispatch(resetStep());
+    }, [dispatch, navigate, tasks]);
 
     return (
         <Dialog

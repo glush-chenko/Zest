@@ -4,7 +4,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import ListItemText from "@mui/material/ListItemText";
 import ListItem from "@mui/material/ListItem";
-import {selectTask, Task} from "../../../../components/task/task-slice";
+import {selectTask, selectTasks, Task} from "../../../../components/task/task-slice";
 import {useAppDispatch, useAppSelector} from "../../../../app/hooks";
 import {selectDrawerOpen} from "../left-section-slice";
 interface LeftSectionListItemProps {
@@ -14,6 +14,7 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
     const dispatch = useAppDispatch();
     const {task} = props;
     const drawer = useAppSelector(selectDrawerOpen);
+    const {selectedTask} = useAppSelector(selectTasks);
 
     const handleTaskClick = useCallback((taskId: string) => {
         dispatch(selectTask(taskId));

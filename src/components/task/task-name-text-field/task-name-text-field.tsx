@@ -25,7 +25,7 @@ export const TaskNameTextField = () => {
 
     const handleTextFieldChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, step: number) => {
         setNameError(event.target.value.trim() === "");
-        dispatch(updateField({step, value: event.target.value}));
+        dispatch(updateField({step, name: event.target.value}));
     }, [dispatch]);
 
     const handleDateChange = useCallback((value: Dayjs | null) => {
