@@ -112,7 +112,7 @@ export const Navigation = () => {
                             >
                                 <Button
                                     // onClick={}
-                                    sx={{my: 2, color: 'white', display: 'block', margin: 0}}
+                                    sx={{my: 2, color: theme.palette.common.white, display: 'block', margin: 0}}
                                 >
                                     {page}
                                 </Button>

@@ -4,7 +4,7 @@ import weekday from 'dayjs/plugin/weekday';
 dayjs.extend(weekday);
 
 export const getWeekDates = () => {
-    const startOfWeek = dayjs().weekday(1);
+    const startOfWeek = dayjs().startOf('day').weekday(1);
     const dates = [];
 
     for (let i = 0; i < 7; i++) {

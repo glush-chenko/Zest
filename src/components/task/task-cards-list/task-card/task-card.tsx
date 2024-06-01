@@ -13,6 +13,7 @@ import Collapse from "@mui/material/Collapse";
 import CardContent from "@mui/material/CardContent";
 import Card from "@mui/material/Card";
 import {useAppDispatch} from "../../../../app/hooks";
+import {useTheme} from "@mui/material";
 
 interface TaskCardProps {
     task: Task;
@@ -20,9 +21,9 @@ interface TaskCardProps {
 
 export const TaskCard = (props: TaskCardProps) => {
     const dispatch = useAppDispatch();
+    const theme = useTheme();
     const {task} = props;
     const [expanded, setExpanded] = React.useState(false);
-    // const value = useAppSelector(selectValueCalendarDay);
 
     const handleExpandTask = useCallback(() => {
         setExpanded((prev) => !prev);
@@ -31,10 +32,6 @@ export const TaskCard = (props: TaskCardProps) => {
     const handleCompleteTask = useCallback((taskId: string) => {
         dispatch(completeTask(taskId));
     }, [dispatch]);
-
-    // console.log(task.scheduledDate === value)
-    // console.log(task.scheduledDate )
-    // console.log("value", value)
 
     const handleEditTask = useCallback((taskId: string) => {
         console.log(taskId);
@@ -64,7 +61,12 @@ export const TaskCard = (props: TaskCardProps) => {
                                     <CheckIcon sx={{fontSize: "1.3rem"}}/>
                                 </IconButton>
                             </Tooltip>
-                            <Typography variant="subtitle1" sx={{color: "black"}}>{task.name}</Typography>
+                            <Typography
+                                variant="subtitle1"
+                                color={theme.palette.mode === 'dark' ? 'common.white' : 'common.black'}
+                            >
+                                {task.name}
+                            </Typography>
                         </Box>
 
                         <Box>
@@ -77,7 +79,6 @@ export const TaskCard = (props: TaskCardProps) => {
                                 <ExpandMore
                                     expand={expanded}
                                     onClick={handleExpandTask}
-                                    // aria-expanded={expanded}
                                     aria-label="show more"
                                 >
                                     <Tooltip title="Show more" placement="top" arrow>
@@ -92,21 +93,6 @@ export const TaskCard = (props: TaskCardProps) => {
                     padding: "0.3rem 0.5rem",
                 }}
             />
-
-            {/*<Box sx={{display: "flex", justifyContent: "center"}}>*/}
-            {/*{task.description && (*/}
-            {/*    <CardActions sx={{display: "flex"}}>*/}
-            {/*        <ExpandMore*/}
-            {/*            expand={expanded}*/}
-            {/*            onClick={handleExpandTask}*/}
-            {/*            // aria-expanded={expanded}*/}
-            {/*            aria-label="show more"*/}
-            {/*        >*/}
-            {/*            <ExpandMoreIcon sx={{display: "flex"}}/>*/}
-            {/*        </ExpandMore>*/}
-            {/*    </CardActions>*/}
-            {/*)}*/}
-            {/*</Box>*/}
 
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent sx={{

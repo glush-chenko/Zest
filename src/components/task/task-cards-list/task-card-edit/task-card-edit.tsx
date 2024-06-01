@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useCallback, useEffect} from "react";
+import React, {ChangeEvent, useCallback} from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
@@ -6,15 +6,15 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, {Dayjs} from "dayjs";
-import {selectTasks, setTempScheduledDate, Task, updateField, updateTask} from "../../task-slice";
+import {selectTask, Task, updateTask} from "../../task-slice";
 import FlagIcon from '@mui/icons-material/Flag';
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
-import CheckIcon from "@mui/icons-material/Check";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {useAppDispatch, useAppSelector} from "../../../../app/hooks";
+import {useAppDispatch} from "../../../../app/hooks";
+import {useTheme} from "@mui/material";
 
 const PRIORITY = [
     {
@@ -36,147 +36,177 @@ const PRIORITY = [
 ];
 
 interface TaskCardEditProps {
-    selected: Task | null;
+    selectedTask: Task | null;
 }
 
 export const TaskCardEdit = (props: TaskCardEditProps) => {
     const dispatch = useAppDispatch();
-    const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(dayjs());
-    const {selected} = props;
+    const theme = useTheme();
+    const {selectedTask} = props;
+    const [name, setName] = React.useState(selectedTask ? selectedTask.name : "");
+    const [description, setDescription] = React.useState(selectedTask ? selectedTask.description : "");
+    const [date, setDate] = React.useState<Dayjs | null>(
+        selectedTask ? dayjs(selectedTask.scheduledDate) : dayjs()
+    );
+    const [nameError, setNameError] = React.useState<boolean>(false);
 
     const handleDateChange = useCallback((value: Dayjs | null) => {
-        setSelectedDate(value);
-        if (value) {
-            dispatch(updateField({name: "", scheduledDate: value.format('MM-DD')}))
-        }
-    }, [dispatch]);
+        setDate(value);
+    }, []);
 
     const handleTextFieldChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        dispatch(updateField({name: event.target.value}));
-    }, [dispatch]);
+        setName(event.target.value);
+        setNameError(event.target.value.trim() === "");
+    }, []);
 
     const handleDescriptionFieldChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        dispatch(updateField({description: event.target.value, name: ""}));
-    }, [dispatch]);
+        setDescription(event.target.value);
+    }, []);
 
-    const handleSaveNameTask = useCallback(() => {
-        dispatch(updateTask({
-            id: selected && selected.id,
-            name: selected && selected.name,
-            description: selected && selected.description,
-            scheduledDate: selected && selected.scheduledDate,
-        }))
-    }, [dispatch, selected]);
+    const handleSaveTask = useCallback(() => {
+        if (selectedTask) {
+            dispatch(updateTask({
+                id: selectedTask.id,
+                name: name,
+                description: description,
+                scheduledDate: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
+            }))
+        } else {
+            console.error("Can't save the task because selectedTask is undefined")
+        }
+        dispatch(selectTask(""));
+    }, [dispatch, selectedTask, name, date, description]);
 
     return (
-        <Card variant="outlined"
-              sx={{
-                  // border: '1px solid green',
-                  // borderBottom: `1px solid lightgray`,
-              }}
+        <Card
+            elevation={0}
+            variant="outlined"
+            sx={{
+                border: `1px solid ${theme.palette.grey[500]}`,
+                width: "100%",
+            }}
         >
-            <CardContent sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem"
-            }}>
+            <CardContent
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                }}
+            >
                 <TextField
                     autoFocus
                     multiline
+                    fullWidth
                     sx={{
-                        width: "30rem",
-                        '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                                border: 'none',
-                            },
-                        },
                         '& .MuiOutlinedInput-input': {
                             overflowWrap: 'break-word',
                         },
                     }}
-                    value={selected?.name}
-                    variant="outlined"
+                    value={name}
+                    variant="standard"
                     onChange={(e) => handleTextFieldChange(e)}
+                    error={nameError}
+                    helperText={nameError ? "The field must be filled in" : ""}
+                    inputProps={{
+                        maxLength: 100,
+                    }}
                 />
 
                 <TextField
                     multiline
+                    fullWidth
                     sx={{
-                        width: "30rem",
-                        '& .MuiOutlinedInput-root': {
-                            '& fieldset': {
-                                border: 'none',
-                            },
-                        },
                         '& .MuiOutlinedInput-input': {
                             overflowWrap: 'break-word',
                         },
                     }}
-                    value={selected?.description ? selected.description : ""}
+                    value={description}
+                    variant="standard"
                     onChange={(e) => handleDescriptionFieldChange(e)}
                 />
 
                 <Box sx={{
                     display: "flex",
                     gap: "1rem",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
+                    height: "2.5rem"
                 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
+                            slotProps={{
+                                textField: {
+                                    size: "small",
+                                    style: {
+                                    //     flexGrow: 1,
+                                        width: "7.5rem"
+                                    },
+                                }
+                            }}
                             sx={{
                                 alignItems: "flex-start",
                                 display: "flex",
-                                width: "30%"
+                                height: "100%",
                             }}
-                            value={selectedDate}
+                            value={date}
                             onChange={handleDateChange}
                             views={['day', 'month']}
                         />
                     </LocalizationProvider>
 
-                    <TextField
-                        select
-                        sx={{
-                            width: "30%",
-                            '& .MuiSelect-icon': {
-                                display: 'none',
-                            },
-                            // '& .MuiSelect-root.MuiSelect-select.MuiSelect-selectMenu': {
-                            //     paddingRight: 24,
-                            // },
-                        }}
-                        label="Priority"
-                        // helperText="Please select your currency"
-                    >
-                        {PRIORITY.map((option) => (
-                            <MenuItem sx={{
-                                display: "flex",
-                                gap: "1rem",
-                                height: "2rem"
+                    <Box sx={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        // flexGrow: 2,
+                        width: "12rem"
+                    }}>
+
+                        <TextField
+                            size="small"
+                            select
+                            fullWidth
+                            sx={{
+                                height: "100%",
+                                '& .MuiSelect-icon': {
+                                    display: 'none',
+                                },
                             }}
-                                      key={option.value}
-                            >
-                                <IconButton sx={{
-                                    color: `${option.label}`,
-                                    '&:hover': {
-                                        backgroundColor: 'transparent',
-                                    },
-                                }}>
-                                    <FlagIcon sx={{fontSize: "1.3rem"}}/>
-                                </IconButton>
-                                <Typography variant="subtitle1" sx={{color: "black"}}>
-                                    {option.value}
-                                </Typography>
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <Button
-                        variant="contained"
-                        sx={{width: "30%"}}
-                        onClick={handleSaveNameTask}
-                    >
-                        Save
-                    </Button>
+                            label="Priority"
+                            // helperText="Please select your currency"
+                        >
+                            {PRIORITY.map((option) => (
+                                <MenuItem sx={{
+                                    display: "flex",
+                                    height: "2rem"
+                                }}
+                                          key={option.value}
+                                >
+                                    <IconButton sx={{
+                                        color: `${option.label}`,
+                                        '&:hover': {
+                                            backgroundColor: 'transparent',
+                                        },
+                                    }}>
+                                        <FlagIcon sx={{fontSize: "1.3rem"}}/>
+                                    </IconButton>
+                                    <Typography variant="subtitle1" sx={{color: theme.palette.common.black}}>
+                                        {option.value}
+                                    </Typography>
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                        <Button
+                            fullWidth
+                            disabled={nameError}
+                            size="small"
+                            variant="contained"
+                            sx={{
+                                height: "100%"
+                            }}
+                            onClick={handleSaveTask}
+                        >
+                            Save
+                        </Button>
+                    </Box>
                 </Box>
 
             </CardContent>

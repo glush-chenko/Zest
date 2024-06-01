@@ -18,15 +18,6 @@ export const Root = () => {
                 <Outlet />
                 <RightSection />
             </Box>
-
-            {/*{location.pathname === "/add-task" ? (*/}
-            {/*    <>*/}
-            {/*        /!*<HomePage/>*!/*/}
-            {/*        <TaskModal/>*/}
-            {/*    </>*/}
-            {/*) : (*/}
-            {/*    <Outlet/>*/}
-            {/*)}*/}
         </>
     )
 }
