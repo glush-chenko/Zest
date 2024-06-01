@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useCallback, useEffect} from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Card from "@mui/material/Card";
@@ -7,40 +7,22 @@ import Typography from "@mui/material/Typography";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {
-    selectTasks, setTempScheduledDate,
-    updateField
-} from "../task-slice";
-import dayjs, {Dayjs} from "dayjs";
-import {TaskButton} from "../task-button/task-button";
+import {useAppDispatch} from "../../../app/hooks";
+import {Dayjs} from "dayjs";
 
-export const TaskNameTextField = () => {
-    const dispatch = useAppDispatch();
-    const {name, description, currentStep, tempScheduledDate} = useAppSelector(selectTasks);
-    // const selectedDate = useAppSelector(selectDate);
-    const [nameError, setNameError] = React.useState<boolean>(false);
-    const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(dayjs());
-    // const [tempScheduledDate, setTempScheduledDate] = React.useState<string>('');
+interface TaskNameTextFieldProps {
+    currentStep: number;
+    name: string;
+    description: string;
+    date: Dayjs | null;
+    nameError: boolean;
+    onNameChange: (name: string) => void;
+    onDescriptionChange: (description: string) => void;
+    onDateChange: (date: Dayjs | null) => void;
+}
 
-    const handleTextFieldChange = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, step: number) => {
-        setNameError(event.target.value.trim() === "");
-        dispatch(updateField({step, name: event.target.value}));
-    }, [dispatch]);
-
-    const handleDateChange = useCallback((value: Dayjs | null) => {
-        setSelectedDate(value);
-        // setTempScheduledDate(value?.format('YYYY-MM-DD') || '');
-
-        dispatch(setTempScheduledDate(value?.format('MM-DD') || ''));
-
-        // if (value) {
-        //     dispatch(setTempScheduledDate(value?.format('YYYY-MM-DD') || ''));
-        // }
-
-        // dispatch(updateScheduledDate({scheduledDate: value.toString()}));
-        //
-    }, [dispatch]);
+export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
+    const {currentStep, name, description, onDescriptionChange, onNameChange, onDateChange, date, nameError} = props;
 
     return (
         <>
@@ -48,16 +30,20 @@ export const TaskNameTextField = () => {
 
                 {currentStep === 0 && (
                     <TextField
+                        multiline
                         autoFocus
                         required
                         fullWidth
-                        label="The input field"
+                        label="Name"
                         sx={{width: "25rem"}}
                         error={nameError}
                         value={name}
-                        onChange={(e) => handleTextFieldChange(e, 0)}
+                        onChange={(e) => onNameChange(e.target.value)}
                         helperText={name.trim() === "" ? 'This field is required' : ''}
                         variant="standard"
+                        inputProps={{
+                            maxLength: 100,
+                        }}
                     />
                 )}
 
@@ -70,12 +56,12 @@ export const TaskNameTextField = () => {
                         </Card>
 
                         <TextField
-                            label="The input field"
+                            label="Description"
                             multiline
                             rows={2}
                             sx={{width: "20rem"}}
                             value={description}
-                            onChange={(e) => handleTextFieldChange(e, 1)}
+                            onChange={(e) => onDescriptionChange(e.target.value)}
                         />
                     </Box>
                 )}
@@ -87,8 +73,8 @@ export const TaskNameTextField = () => {
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                                 label="The input field"
-                                value={selectedDate}
-                                onChange={handleDateChange}
+                                value={date}
+                                onChange={onDateChange}
                                 views={['day', 'month']}
                             />
                         </LocalizationProvider>

@@ -4,16 +4,12 @@ import Box from "@mui/material/Box";
 import {useAppSelector} from "../../../app/hooks";
 import {selectTasks} from "../task-slice";
 import {TaskCard} from "./task-card/task-card";
-import {selectValueCalendarDay} from "../../../features/main/right-section/right-section-slice";
-import {getWeekDates} from "../../../utils/get-week-dates";
+import {selectRightSection} from "../../../features/main/right-section/right-section-slice";
+import dayjs from "dayjs";
 
 export const TaskCardsList = () => {
-    const weekDates = getWeekDates();
     const {tasks} = useAppSelector(selectTasks);
-    const {valueCalendarDay, dayOfWeek} = useAppSelector(selectValueCalendarDay);
-    // const selectedDate = useAppSelector(selectDate);
-    //new Date().toDateString()
-
+    const {selectedDate} = useAppSelector(selectRightSection);
 
     return (
         <>
@@ -24,15 +20,11 @@ export const TaskCardsList = () => {
                 padding: "1rem 0"
             }}>
                 <Typography variant="h6" gutterBottom sx={{fontWeight: "bold"}}>
-                    Tasks for {`${weekDates[dayOfWeek].format("ddd, DD MMM YYYY")}`}
+                    Tasks for {`${dayjs(selectedDate).format("ddd, DD MMM YYYY")}`}
                 </Typography>
-                {/*{tasks.map((task) => (*/}
-                {/*    <Box key={task.id}>*/}
-                {/*        <TaskCard task={task} key={task.id}/>*/}
-                {/*    </Box>*/}
-                {/*))}*/}
-                {tasks.map((task) => {
-                    if (task.scheduledDate === valueCalendarDay) {
+
+                {tasks.filter((t) => !t.completed).map((task) => {
+                    if (task.scheduledDate === selectedDate) {
                         return (
                             <Box key={task.id}>
                                 <TaskCard task={task} key={task.id}/>

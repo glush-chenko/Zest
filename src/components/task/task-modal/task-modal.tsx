@@ -1,36 +1,111 @@
-import React, {useCallback, useEffect} from "react";
+import React, {useCallback, useMemo} from "react";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {selectTasks, toggleTaskCreator, selectTask, resetStep} from "../task-slice";
+import {
+    selectTasks,
+    selectTask,
+    addTask,
+} from "../task-slice";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import {TaskNameTextField} from "../task-name-text-field/task-name-text-field";
-import {TaskButton} from "../task-button/task-button";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
-import {Task} from "../task";
+import {TaskButtons} from "../task-buttons/task-buttons";
+import {useNavigate} from "react-router-dom";
 import {TaskStepper} from "../task-stepper/task-stepper";
-import {TaskCard} from "../task-cards-list/task-card/task-card";
+import dayjs, {Dayjs} from "dayjs";
+
+const STEPS = [
+    {
+        index: 0,
+        name: 'Describe the name of the task',
+        completed: false
+    },
+    {
+        index: 1,
+        name: 'Description, if required',
+        completed: false
+    },
+    {
+        index: 2,
+        name: 'Period of execution',
+        completed: false
+    }
+]
 
 export const TaskModal = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const location = useLocation();
-    const {taskId} = useParams<{ taskId?: string }>();
-    const {name, description, isTaskCreatorOpen, tasks, selectedTask} = useAppSelector(selectTasks);
+    const {tasks, selectedTask} = useAppSelector(selectTasks);
+    const [currentStep, setCurrentStep] = React.useState(0);
+    const [steps, setSteps] = React.useState(STEPS);
+    const [name, setName] = React.useState("");
+    const [description, setDescription] = React.useState("");
+    const [date, setDate] = React.useState<Dayjs | null>(dayjs());
+    const [nameError, setNameError] = React.useState<boolean>(false);
+
+
+    const handleNameChange = useCallback((name: string) => {
+        setNameError(name.trim() === "");
+        setName(name);
+    }, []);
+
+    const handleDescriptionChange = useCallback((description: string) => {
+        setDescription(description);
+    }, []);
+
+    const handleDateChange = useCallback((date: Dayjs | null) => {
+        setDate(date);
+    }, []);
 
     const handleClose = useCallback(() => {
-        dispatch(toggleTaskCreator(false));
-        // dispatch(openSelectTask(false));
         dispatch(selectTask(null));
         tasks.length ? navigate('/tasks') : navigate('/');
-        dispatch(resetStep());
     }, [dispatch, navigate, tasks]);
+
+    const handleBack = useCallback(() => {
+        const newStep = currentStep - 1;
+        setCurrentStep(newStep);
+        setSteps(steps.map((step) => {
+            if (step.index === currentStep) {
+                step.completed = false;
+            }
+            return step;
+        }))
+    }, [currentStep]);
+
+    const handleNext = useCallback(() => {
+        const newStep = currentStep + 1;
+        setCurrentStep(newStep);
+        setSteps(steps.map((step) => {
+            if (step.index === currentStep) {
+                step.completed = true;
+            }
+            return step;
+        }))
+    }, [currentStep]);
+
+    const handleSkip = useCallback(() => {
+        setCurrentStep((prevValue) => prevValue + 1);
+    }, []);
+
+    const handleAddTask = useCallback(() => {
+        dispatch(addTask({
+            name,
+            description,
+            date: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf()
+        }));
+        
+        navigate('/tasks');
+    }, [dispatch, name, description, date]);
+
+    const disableNextButton = useMemo(() => {
+        return currentStep === 0 && name.trim() === '';
+    }, [currentStep, name]);
 
     return (
         <Dialog
-            open={isTaskCreatorOpen || location.pathname === "/add-task" || !!selectedTask}
+            open
             onClose={handleClose}
             fullWidth={true}
             maxWidth='md'
@@ -47,13 +122,30 @@ export const TaskModal = () => {
             <DialogContent
                 sx={{display: "flex", flexDirection: "row", gap: "5rem", padding: "0 3rem"}}
             >
-                <TaskStepper/>
-                <TaskNameTextField/>
+                <TaskStepper steps={steps} currentStep={currentStep}/>
+                <TaskNameTextField
+                    currentStep={currentStep}
+                    name={name}
+                    description={description}
+                    date={date}
+                    nameError={nameError}
+                    onNameChange={handleNameChange}
+                    onDateChange={handleDateChange}
+                    onDescriptionChange={handleDescriptionChange}
+                />
                 {/*<TaskButton/>*/}
             </DialogContent>
 
             <DialogActions>
-                <TaskButton/>
+                <TaskButtons
+                    onBack={handleBack}
+                    onNext={handleNext}
+                    onSkip={handleSkip}
+                    addTask={handleAddTask}
+                    currentStep={currentStep}
+                    isLastStep={currentStep === steps.length - 1}
+                    disabledNext={disableNextButton}
+                />
             </DialogActions>
         </Dialog>
     );

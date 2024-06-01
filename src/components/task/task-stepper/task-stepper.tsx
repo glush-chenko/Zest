@@ -3,26 +3,29 @@ import Typography from "@mui/material/Typography";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Stepper from "@mui/material/Stepper";
-import {isStepOptional} from "../task";
-import {useAppSelector} from "../../../app/hooks";
-import {selectTasks} from "../task-slice";
+import {isStepOptional} from "../../../utils/is-step-optional";
 
-export const STEPS = ['Describe the name of the task', 'Description, if required', 'Period of execution'];
+interface TaskStep {
+    index: number,
+    name: string,
+    completed: boolean,
+}
 
-export const TaskStepper = () => {
-    const {currentStep, skipped} = useAppSelector(selectTasks);
+interface TaskStepperProps {
+    steps: TaskStep[];
+    currentStep: number;
+}
 
-    const isStepSkipped = (step: number) => {
-        return skipped.includes(step);
-    };
+
+export const TaskStepper = (props: TaskStepperProps) => {
+    const {steps, currentStep} = props;
 
     return (
         <Stepper
             orientation="vertical"
             activeStep={currentStep}
         >
-            {STEPS.map((label, index) => {
-                const stepProps: { completed?: boolean } = {};
+            {steps.map((step, index) => {
                 const labelProps: {
                     optional?: React.ReactNode;
                 } = {};
@@ -31,12 +34,9 @@ export const TaskStepper = () => {
                         <Typography variant="caption">Optional</Typography>
                     );
                 }
-                if (isStepSkipped(index)) {
-                    stepProps.completed = false;
-                }
                 return (
-                    <Step key={label} {...stepProps}>
-                        <StepLabel {...labelProps}>{label}</StepLabel>
+                    <Step key={step.name} completed={step.completed}>
+                        <StepLabel {...labelProps}>{step.name}</StepLabel>
                     </Step>
                 );
             })}

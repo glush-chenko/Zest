@@ -4,34 +4,29 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import EditIcon from '@mui/icons-material/Edit';
 import {useTheme} from "@mui/material";
-import {useAppDispatch} from "../../app/hooks";
-import {toggleTaskCreator} from "../task/task-slice";
-import {useCallback} from "react";
 import {NavLink} from "react-router-dom";
 
 export const OpenIconSpeedDial = () => {
     const theme = useTheme();
-    const dispatch = useAppDispatch();
-
-    const handleToggleTaskCreator = useCallback(() => {
-        dispatch(toggleTaskCreator(true));
-    }, [dispatch]);
 
     return (
-        <Box sx={{
-            transform: 'translateZ(0px)',
-            position: "absolute",
-            bottom: theme.spacing(7),
-            right: theme.spacing(13),
-        }}
+        <Box
+            sx={{
+                transform: 'translateZ(0px)',
+                position: "absolute",
+                bottom: theme.spacing(7),
+                right: theme.spacing(13),
+            }}
         >
-            <NavLink to={`/add-task`} style={{
-                textDecoration: 'none',
-            }}>
+            <NavLink
+                to={`/add-task`}
+                style={{
+                    textDecoration: 'none',
+                }}
+            >
                 <SpeedDial
                     ariaLabel="SpeedDial openIcon example"
                     icon={<SpeedDialIcon openIcon={<EditIcon/>}/>}
-                    onClick={handleToggleTaskCreator}
                     sx={{
                         "& .MuiSpeedDial-fab": {
                             backgroundColor: theme.palette.secondary.main,

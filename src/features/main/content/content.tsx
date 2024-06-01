@@ -2,11 +2,10 @@ import React from "react";
 import Astronaut from "../../../assets/Astronaut-01.svg"
 import {useTheme} from "@mui/material";
 import {OpenIconSpeedDial} from "../../../components/generic/open-icon-speed-dial";
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import { selectTasks} from "../../../components/task/task-slice";
+import {useAppSelector} from "../../../app/hooks";
+import {selectTasks} from "../../../components/task/task-slice";
 import Box from '@mui/material/Box';
 import Typography from "@mui/material/Typography";
-import {TaskModal} from "../../../components/task/task-modal/task-modal";
 import {TaskCardsList} from "../../../components/task/task-cards-list/task-cards-list";
 import {useLocation} from "react-router-dom";
 import {TaskEditModal} from "../../../components/task/task-edit-modal/task-edit-modal";
@@ -14,25 +13,10 @@ import {selectHeader} from "../../header/header-slice";
 import {HeaderModalProfile} from "../../header/header-modal-profile/header-modal-profile";
 
 export const Content = () => {
-    const dispatch = useAppDispatch();
     const theme = useTheme();
     const {open} = useAppSelector(selectHeader);
-    // const dispatch = useAppDispatch();
     const location = useLocation();
-    const {isTaskCreatorOpen, tasks, selectedTask} = useAppSelector(selectTasks);
-
-    // useEffect(() => {
-    //     const tasksFromStorage = localStorage.getItem('tasks');
-    //     if (tasksFromStorage) {
-    //         dispatch(filterTasksByDate(JSON.parse(tasksFromStorage)));
-    //     }
-    // }, [dispatch]);
-    //
-    // useEffect(() => {
-    //     dispatch(filterTasksByDate(dayjs().toString()));
-    // }, [dispatch]);
-    //
-    // console.log(filteredTasksByDate)
+    const {tasks, selectedTask} = useAppSelector(selectTasks);
 
     return (
         <Box sx={{
@@ -45,7 +29,6 @@ export const Content = () => {
             padding: "1rem 4rem",
         }}>
             {open && <HeaderModalProfile />}
-            {isTaskCreatorOpen && <TaskModal/>}
             {selectedTask && <TaskEditModal />}
 
             {tasks.length && location.pathname === "/tasks" ? (
@@ -53,7 +36,7 @@ export const Content = () => {
                     width: "100%",
                 }}>
                     <TaskCardsList />
-                    {/*<OpenIconSpeedDial/>*/}
+                    <OpenIconSpeedDial/>
                 </Box>
             ) : (
                 <>
