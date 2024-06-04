@@ -16,8 +16,9 @@ import Toolbar from "@mui/material/Toolbar";
 import {selectTasks} from "../../../components/task/task-slice";
 import {LeftSectionListItem} from "./left-section-list-item/left-section-list-item";
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
-import DoneIcon from '@mui/icons-material/Done';
+import DoneIcon from '@mui/icons-material/CheckCircleOutline';
 import {NavLink} from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
 
 export const LeftSection = () => {
     const dispatch = useAppDispatch();
@@ -48,7 +49,7 @@ export const LeftSection = () => {
                 <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'center',
                     backgroundColor: theme.palette.mode === "light" ? theme.palette.secondary.light : theme.palette.grey[900],
                     color: theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
                     minHeight: "3.5rem",
@@ -69,75 +70,91 @@ export const LeftSection = () => {
                 <Divider/>
 
                 <Box sx={{overflow: "auto"}}>
-                    <List>
-                        {drawer && <Typography
-                            variant="subtitle2"
-                            gutterBottom
-                            sx={{
-                                color: theme.palette.warning.main,
-                                display: "flex",
-                                gap: "0.5rem",
-                                padding: '0.5rem 1rem',
-                                margin: 0,
-                                fontSize: "1rem"
-                            }}>
-                            <AutorenewOutlinedIcon/>
-                            In progress:
-                        </Typography>}
+                    {drawer && <Typography
+                        variant="subtitle2"
+                        gutterBottom
+                        sx={{
+                            color: theme.palette.warning.main,
+                            display: "flex",
+                            gap: "0.5rem",
+                            padding: '0.5rem 1rem',
+                            margin: 0,
+                            fontSize: "1rem",
+                        }}>
+                        <AutorenewOutlinedIcon/>
+                        In progress:
+                    </Typography>}
 
+                    {/*<Tooltip title={task.name} placement="right" arrow>*/}
+                    <List
+                        sx={{
+                            marginLeft: drawer ? "0.5rem" : 0,
+                        }}
+                    >
                         {!activeTasks.length && (
                             <Box sx={{paddingLeft: "1.5rem"}}>
                                 <Typography variant="body1">{drawer && "No active tasks"}</Typography>
                             </Box>
                         )}
                         {activeTasks.map((task) => (
-                            <NavLink
-                                to={`/tasks/${task.id}`}
-                                style={{
-                                    textDecoration: 'none',
-                                    color: 'inherit'
-                                }}
-                                key={task.id}
-                            >
-                                <LeftSectionListItem task={task} key={task.id} icon={CircleOutlinedIcon}/>
-                            </NavLink>
+                            <Tooltip title={task.name} placement="right" key={task.id}>
+                                <NavLink
+                                    to={`/tasks/${task.id}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    <LeftSectionListItem
+                                        task={task}
+                                        key={task.id}
+                                        icon={CircleOutlinedIcon}
+                                        done={false}
+                                    />
+                                </NavLink>
+                            </Tooltip>
                         ))}
                     </List>
 
                     {(drawer || activeTasks.length > 0) && <Divider/>}
 
-                    <List>
-                        {drawer && <Typography
-                            variant="subtitle2"
-                            gutterBottom
-                            sx={{
-                                color: theme.palette.success.light,
-                                display: "flex",
-                                gap: "0.5rem",
-                                padding: '0.5rem 1rem',
-                                margin: 0,
-                                fontSize: "1rem"
-                            }}>
-                            <PublishedWithChangesOutlinedIcon/>
-                            Completed:
-                        </Typography>}
+                    {drawer && <Typography
+                        variant="subtitle2"
+                        gutterBottom
+                        sx={{
+                            color: theme.palette.success.light,
+                            display: "flex",
+                            gap: "0.5rem",
+                            padding: '0.5rem 1rem',
+                            margin: 0,
+                            fontSize: "1rem"
+                        }}>
+                        <PublishedWithChangesOutlinedIcon/>
+                        Completed:
+                    </Typography>}
 
+                    <List
+                        sx={{
+                            marginLeft: drawer ? "0.5rem" : 0
+                        }}
+                    >
                         {!completedTasks.length && (
                             <Box sx={{paddingLeft: "1.5rem"}}>
                                 <Typography variant="body1">{drawer && "No completed tasks"}</Typography>
                             </Box>
                         )}
                         {completedTasks.map((task) => (
-                            <NavLink
-                                to={`/tasks/${task.id}`}
-                                style={{
-                                    textDecoration: 'none',
-                                    color: 'inherit'
-                                }}
-                                key={task.id}
-                            >
-                                <LeftSectionListItem task={task} icon={DoneIcon}/>
-                            </NavLink>
+                            <Tooltip title={task.name} placement="right" key={task.id}>
+                                <NavLink
+                                    to={`/tasks/${task.id}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    <LeftSectionListItem task={task} icon={DoneIcon} done={true}/>
+                                </NavLink>
+                            </Tooltip>
                         ))}
                     </List>
                 </Box>

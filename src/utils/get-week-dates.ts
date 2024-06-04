@@ -4,11 +4,13 @@ import weekday from 'dayjs/plugin/weekday';
 dayjs.extend(weekday);
 
 export const getWeekDates = () => {
-    const startOfWeek = dayjs().startOf('day').weekday(1);
+    const today = dayjs();
+    const weekStart = today.weekday(0);
+
     const dates = [];
 
     for (let i = 0; i < 7; i++) {
-        const date = startOfWeek.add(i, 'day');
+        const date = weekStart.add(i, 'day');
         dates.push(date);
     }
 

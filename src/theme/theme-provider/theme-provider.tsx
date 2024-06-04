@@ -1,5 +1,5 @@
 import React, {ReactNode, useEffect, useState} from 'react';
-import {createTheme, ThemeProvider as MUIThemeProvider } from "@mui/material/styles";
+import {createTheme, PaletteOptions, ThemeProvider as MUIThemeProvider} from "@mui/material/styles";
 import {selectTheme, toggleTheme} from "./theme-provider-slice";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 
@@ -22,6 +22,12 @@ declare module '@mui/material/styles' {
     }
 }
 
+export interface ExtendedPaletteOptions extends PaletteOptions {
+    beige: {
+        main: string;
+    };
+}
+
 export const ThemeProvider = ({ children }: {children: ReactNode}) => {
     const dispatch = useAppDispatch();
     const mode = useAppSelector(selectTheme);
@@ -35,11 +41,11 @@ export const ThemeProvider = ({ children }: {children: ReactNode}) => {
         palette: {
             mode,
             primary: {
-                main: '#9ed079',
+                main: "#9381E7",
                 // contrastText: "#fff",
             },
             secondary: {
-                main: mode === "light" ? '#eabe50' : "#a276d8",
+                main: mode === "light" ? '#eabe50' : "rgba(147,67,241,0.89)",
                 contrastText: "#000"
             },
             text: {
@@ -50,8 +56,11 @@ export const ThemeProvider = ({ children }: {children: ReactNode}) => {
                 lightTrack: '#aab4be',
                 darkThumb: '#2754a4',
                 lightThumb: '#eabe50'
-            }
-        },
+            },
+            beige: {
+                main: '#faebd73d',
+            },
+        } as ExtendedPaletteOptions,
     });
 
     return (

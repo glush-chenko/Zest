@@ -1,27 +1,42 @@
-import React, { useEffect} from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {useTheme} from "@mui/material";
-import {useAppDispatch} from "../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {getWeekDates} from "../../../utils/get-week-dates";
 import {updateSelectedDate} from './right-section-slice';
+import Tooltip from "@mui/material/Tooltip";
+import {selectTasks} from "../../../components/task/task-slice";
+import {useNavigate} from "react-router-dom";
+import dayjs, {Dayjs} from "dayjs";
 
 export const RightSection = () => {
     const dispatch = useAppDispatch();
     const theme = useTheme();
+    const navigate = useNavigate()
     const [value, setValue] = React.useState(0);
+    const {tasks} = useAppSelector(selectTasks);
     const weekDates = getWeekDates();
 
     useEffect(() => {
         const day = new Date().getDay();
-        setValue((day + 6) % 7)
+        setValue((day + 6) % 7);
     }, [dispatch]);
 
-    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+    const handleChange = useCallback((_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
-        dispatch(updateSelectedDate(weekDates[newValue].valueOf()));
-    };
+        dispatch(updateSelectedDate(weekDates[newValue].startOf('day').valueOf()));
+        navigate("/tasks")
+    }, [dispatch, weekDates, navigate]);
+
+    const getActiveTasksForDate = useCallback((date: Dayjs) => {
+        return tasks.filter((task) => dayjs(task.scheduledDate).isSame(date, 'day') && !task.completed);
+    }, [tasks]);
+
+    const handleClickTab = useCallback(() => {
+        navigate("/tasks");
+    }, [navigate]);
 
     return (
         <Box sx={{
@@ -34,9 +49,7 @@ export const RightSection = () => {
         }}>
             <Tabs
                 orientation="vertical"
-                variant="scrollable"
                 value={value}
-                scrollButtons="auto"
                 onChange={handleChange}
                 aria-label="scrollable prevent tabs"
                 sx={{
@@ -61,6 +74,7 @@ export const RightSection = () => {
                         flexGrow: 1,
                         padding: theme.spacing(2),
                         minHeight: 'auto',
+                        minWidth: "auto",
                         '& .Mui-selected': {
                             fontWeight: theme.typography.fontWeightBold,
                         },
@@ -68,21 +82,28 @@ export const RightSection = () => {
                 }}
             >
                 {weekDates.map((date, index) => (
-                    <Tab
+                    <Tooltip
+                        title={`${getActiveTasksForDate(date).length} tasks`}
+                        placement="left"
                         key={index}
-                        label={
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: "1rem"
-                            }}>
-                                <span>{date?.format('ddd')}</span>
-                                <span>{date?.format('D')}</span>
-                            </Box>
-                        }
-                    />
+                        aria-label={`${tasks.length} tasks`}
+                    >
+                        <Tab
+                            onClick={handleClickTab}
+                            label={
+                                <Box sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: "1rem"
+                                }}>
+                                    <span>{date?.format('ddd')}</span>
+                                    <span>{date?.format('D')}</span>
+                                </Box>
+                            }
+                        />
+                    </Tooltip>
                 ))}
             </Tabs>
         </Box>

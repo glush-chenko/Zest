@@ -2,7 +2,6 @@ import React from "react";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import {isStepOptional} from "../../../utils/is-step-optional";
-import {Snackbar} from "../../generic/snackbar";
 
 interface TaskButtonsProps {
     onBack: () => void;

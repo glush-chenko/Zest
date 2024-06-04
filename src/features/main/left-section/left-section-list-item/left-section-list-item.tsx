@@ -8,14 +8,19 @@ import {useAppDispatch, useAppSelector} from "../../../../app/hooks";
 import {selectDrawerOpen} from "../left-section-slice";
 import {SvgIconComponent} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
+import {useTheme} from "@mui/material";
+
 interface LeftSectionListItemProps {
     task: Task;
     icon: SvgIconComponent;
+    done: boolean;
 }
+
 export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {task, icon: Icon} = props;
+    const theme = useTheme();
+    const {task, icon: Icon, done} = props;
     const drawer = useAppSelector(selectDrawerOpen);
 
     const handleTaskClick = useCallback((taskId: string) => {
@@ -36,11 +41,15 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
                 <ListItemIcon
                     sx={{
                         minWidth: 0,
-                        mr: drawer ? 1 : 'auto',
+                        mr: drawer ? 1 : 0,
                         justifyContent: 'center',
                     }}
                 >
-                    <Icon />
+                    <Icon
+                        sx={{
+                            color: done ? theme.palette.success.light : theme.palette.primary.light
+                        }}
+                    />
                 </ListItemIcon>
                 <ListItemText
                     primary={task.name}
@@ -49,7 +58,8 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        fontSize: "100"
+                        width: drawer ? "auto" : 0,
+                        flexGrow: 0
                     }}
                 />
             </ListItemButton>
