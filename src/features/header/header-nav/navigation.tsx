@@ -1,11 +1,9 @@
-import React, {useCallback} from "react";
-// import AppBar from '@mui/material/AppBar';
+import React, {useCallback, useEffect} from "react";
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -18,16 +16,15 @@ import logo2 from "../../../assets/zest-logo2.png"
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {toggleTheme} from "../../../theme/theme-provider/theme-provider-slice";
 import {AppBar} from "../../../components/styled/app-bar";
-import {LeftSection} from "../../main/left-section/left-section";
 import {selectDrawerOpen} from "../../main/left-section/left-section-slice";
-import {RightSection} from "../../main/right-section/right-section";
-import {NavLink} from "react-router-dom";
-import {selectHeader, toggleHeaderProfile} from "../header-slice";
+import {NavLink, useLocation} from "react-router-dom";
+import {selectHeader, setImageSrc, toggleHeaderProductivity, toggleHeaderProfile} from "../header-slice";
 
 const PAGES = ['tasks', 'about', 'ideas', 'contact'];
-const SETTINGS = ['Profile', 'Progress', 'Dashboard'];
+const SETTINGS = ['Profile', 'Productivity', 'Dashboard'];
 
 export const Navigation = () => {
+    const location = useLocation();
     const theme = useTheme();
     const dispatch = useAppDispatch();
     const drawer = useAppSelector(selectDrawerOpen);
@@ -35,12 +32,20 @@ export const Navigation = () => {
     // const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
+    useEffect(() => {
+        const savedAvatar = localStorage.getItem('avatarSrc');
+        if (savedAvatar) {
+            dispatch(setImageSrc(savedAvatar));
+        }
+    }, [dispatch]);
+
     // const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     //     setAnchorElNav(event.currentTarget);
     // };
     const handleOpenUserMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
         dispatch(toggleHeaderProfile(false));
+        // dispatch(toggleHeaderProductivity(false));
     }, [dispatch]);
 
     // const handleCloseNavMenu = () => {
@@ -51,17 +56,25 @@ export const Navigation = () => {
         const text = (event.target as HTMLElement).textContent;
         if (text === "Profile") {
             dispatch(toggleHeaderProfile(true));
+        } else if (text === "Productivity") {
+            dispatch(toggleHeaderProductivity(true));
         }
         setAnchorElUser(null);
     }, [dispatch]);
 
-    const handleChangeTheme = () => {
+    const handleChangeTheme = useCallback(() => {
         dispatch(toggleTheme());
-    }
+    }, [dispatch]);
 
     return (
-        <AppBar position="static" open={drawer}>
-            <Container maxWidth="xl">
+        <AppBar
+            position="static"
+            open={drawer}
+            sx={{
+                boxShadow: "none"
+            }}
+        >
+            <Container maxWidth={false}>
                 <Toolbar disableGutters>
                     <Box
                         component="img"
@@ -120,24 +133,26 @@ export const Navigation = () => {
                         ))}
                     </Box>
 
-                    <FormControlLabel
-                        control={
-                            <ThemeSwitch
-                                checked={theme.palette.mode === 'dark'}
-                                onChange={handleChangeTheme}
-                                name="theme-toggle"
-                                color="primary"
-                            />
-                        }
-                        label=""
-                    />
+                    {!(location && location.pathname === "/about") && (
+                        <FormControlLabel
+                            control={
+                                <ThemeSwitch
+                                    checked={theme.palette.mode === 'dark'}
+                                    onChange={handleChangeTheme}
+                                    name="theme-toggle"
+                                    color="primary"
+                                />
+                            }
+                            label=""
+                        />
+                    )}
 
                     <Box sx={{flexGrow: 0}}>
-                        <Tooltip title="Open settings">
+                        {!(location && location.pathname === "/about") && (<Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
                                 <Avatar src={src}/>
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip>)}
                         <Menu
                             sx={{mt: '3rem'}}
                             anchorEl={anchorElUser}

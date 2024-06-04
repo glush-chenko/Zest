@@ -6,15 +6,18 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, {Dayjs} from "dayjs";
-import {selectTask, Task, updateTask} from "../../task-slice";
+import {selectTask, setEditingTaskId, Task, updateTask} from "../../task-slice";
 import FlagIcon from '@mui/icons-material/Flag';
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
+import CloseIcon from '@mui/icons-material/Close';
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import {useAppDispatch} from "../../../../app/hooks";
 import {useTheme} from "@mui/material";
+import {useNavigate} from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
 
 const PRIORITY = [
     {
@@ -41,6 +44,7 @@ interface TaskCardEditProps {
 
 export const TaskCardEdit = (props: TaskCardEditProps) => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const theme = useTheme();
     const {selectedTask} = props;
     const [name, setName] = React.useState(selectedTask ? selectedTask.name : "");
@@ -71,11 +75,19 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                 description: description,
                 scheduledDate: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
             }))
+            dispatch(setEditingTaskId(null));
+            navigate("/tasks")
         } else {
             console.error("Can't save the task because selectedTask is undefined")
         }
         dispatch(selectTask(""));
-    }, [dispatch, selectedTask, name, date, description]);
+    }, [dispatch, selectedTask, name, date, description, navigate]);
+
+    const handleCloseTask = useCallback(() => {
+        dispatch(selectTask(""));
+        dispatch(setEditingTaskId(null));
+        navigate("/tasks")
+    }, [dispatch, navigate])
 
     return (
         <Card
@@ -86,6 +98,31 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                 width: "100%",
             }}
         >
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    backgroundColor: theme.palette.primary.main,
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexGrow: 1,
+                        justifyContent: "center"
+                    }}
+                >
+                    <Typography variant="h6">Task edit</Typography>
+                </Box>
+                <IconButton
+                    aria-label="close"
+                    onClick={handleCloseTask}
+                >
+                    <CloseIcon sx={{fontSize: "1.3rem"}}/>
+                </IconButton>
+            </Box>
+
             <CardContent
                 sx={{
                     display: "flex",
@@ -93,6 +130,7 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                     gap: "0.5rem",
                 }}
             >
+
                 <TextField
                     autoFocus
                     multiline
@@ -111,6 +149,7 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                         maxLength: 100,
                     }}
                 />
+                {/*</Box>*/}
 
                 <TextField
                     multiline
@@ -137,8 +176,7 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                                 textField: {
                                     size: "small",
                                     style: {
-                                    //     flexGrow: 1,
-                                        width: "7.5rem"
+                                        width: "7.7rem"
                                     },
                                 }
                             }}

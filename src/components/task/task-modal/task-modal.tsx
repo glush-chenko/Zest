@@ -1,5 +1,5 @@
-import React, {useCallback, useMemo} from "react";
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import React, {useCallback, useEffect, useMemo} from "react";
+import {useAppDispatch, useAppSelector, useSnackbarWithAction} from "../../../app/hooks";
 import {
     selectTasks,
     selectTask,
@@ -15,30 +15,31 @@ import {useNavigate} from "react-router-dom";
 import {TaskStepper} from "../task-stepper/task-stepper";
 import dayjs, {Dayjs} from "dayjs";
 
-const STEPS = [
-    {
-        index: 0,
-        name: 'Describe the name of the task',
-        completed: false
-    },
-    {
-        index: 1,
-        name: 'Description, if required',
-        completed: false
-    },
-    {
-        index: 2,
-        name: 'Period of execution',
-        completed: false
-    }
-]
+const ADD_TASK_SNACKBAR_KEY = "add-task-snackbar-key";
 
 export const TaskModal = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {tasks, selectedTask} = useAppSelector(selectTasks);
+    const {tasks, newTaskId} = useAppSelector(selectTasks);
     const [currentStep, setCurrentStep] = React.useState(0);
-    const [steps, setSteps] = React.useState(STEPS);
+    const [steps, setSteps] = React.useState(
+        [
+        {
+            index: 0,
+            name: 'Describe the name of the task',
+            completed: false
+        },
+        {
+            index: 1,
+            name: 'Description, if required',
+            completed: false
+        },
+        {
+            index: 2,
+            name: 'Period of execution',
+            completed: false
+        }
+    ]);
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [date, setDate] = React.useState<Dayjs | null>(dayjs());
@@ -95,9 +96,10 @@ export const TaskModal = () => {
             description,
             date: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf()
         }));
+
         
         navigate('/tasks');
-    }, [dispatch, name, description, date]);
+    }, [dispatch, name, description, date, newTaskId]);
 
     const disableNextButton = useMemo(() => {
         return currentStep === 0 && name.trim() === '';

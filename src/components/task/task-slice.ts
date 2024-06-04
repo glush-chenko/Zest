@@ -14,11 +14,15 @@ export interface Task {
 interface TaskState {
     tasks: Task[];
     selectedTask: Task | null;
+    newTaskId: string | null;
+    editingTaskId: string | null;
 }
 
 const initialState: TaskState = {
     tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
     selectedTask: null,
+    newTaskId: "",
+    editingTaskId: null,
 };
 
 const taskSlice = createSlice({
@@ -31,7 +35,7 @@ const taskSlice = createSlice({
             description: string,
             scheduledDate: number
         }>) => {
-            const {name, description, scheduledDate } = action.payload;
+            const {name, description, scheduledDate} = action.payload;
 
             const updatedTasks = state.tasks.map(task => {
                 if (task.id === action.payload.id) {
@@ -49,16 +53,23 @@ const taskSlice = createSlice({
             localStorage.removeItem('tasks');
             localStorage.setItem('tasks', JSON.stringify(updatedTasks));
         },
-        addTask: (state, action: PayloadAction<{name: string, description: string, date: number}>) => {
+        addTask: (state, action: PayloadAction<{ name: string, description: string, date: number }>) => {
             const newTask: Task = {
                 id: uuidv4(),
                 name: action.payload.name,
-                description:  action.payload.description,
+                description: action.payload.description,
                 completed: false,
                 scheduledDate: action.payload.date,
             };
             state.tasks.push(newTask);
             localStorage.setItem('tasks', JSON.stringify(state.tasks));
+            state.newTaskId = newTask.id;
+        },
+        setNewTaskId: (state, action: PayloadAction<string | null>) => {
+            state.newTaskId = action.payload;
+        },
+        setEditingTaskId: (state, action: PayloadAction<string | null>) => {
+            state.editingTaskId = action.payload;
         },
         removeTask: (state, action: PayloadAction<string>) => {
             state.tasks = state.tasks.filter((task) => task.id !== action.payload);
@@ -84,6 +95,8 @@ const taskSlice = createSlice({
 export const {
     addTask,
     removeTask,
+    setNewTaskId,
+    setEditingTaskId,
     completeTask,
     selectTask,
     updateTask,

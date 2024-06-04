@@ -1,5 +1,5 @@
 import React, {useCallback} from "react";
-import {completeTask, Task} from "../../task-slice";
+import {completeTask, removeTask, setEditingTaskId, Task} from "../../task-slice";
 import CardHeader from "@mui/material/CardHeader";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -14,6 +14,7 @@ import CardContent from "@mui/material/CardContent";
 import Card from "@mui/material/Card";
 import {useAppDispatch} from "../../../../app/hooks";
 import {useTheme} from "@mui/material";
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 interface TaskCardProps {
     task: Task;
@@ -34,12 +35,17 @@ export const TaskCard = (props: TaskCardProps) => {
     }, [dispatch]);
 
     const handleEditTask = useCallback((taskId: string) => {
-        console.log(taskId);
-    }, []);
+        dispatch(setEditingTaskId(taskId));
+    }, [dispatch])
 
+    const handleDeleteTask = useCallback((taskId: string) => {
+        dispatch(removeTask(taskId));
+    }, [dispatch]);
 
     return (
-        <Card variant="outlined" sx={{
+        <Card
+            variant="outlined"
+            sx={{
             border: 'none',
             borderBottom: `1px solid lightgray`,
         }}
@@ -71,7 +77,10 @@ export const TaskCard = (props: TaskCardProps) => {
 
                         <Box>
                             <Tooltip title="Edit task" placement="top" arrow>
-                                <IconButton aria-label="settings" onClick={() => handleEditTask(task.id)}>
+                                <IconButton
+                                    aria-label="settings"
+                                    onClick={() => handleEditTask(task.id)}
+                                >
                                     <EditIcon sx={{fontSize: "1.3rem"}}/>
                                 </IconButton>
                             </Tooltip>
@@ -86,6 +95,18 @@ export const TaskCard = (props: TaskCardProps) => {
                                     </Tooltip>
                                 </ExpandMore>
                             )}
+                            <Tooltip title="Delete task" placement="top" arrow>
+                                <IconButton
+                                    aria-label="delete"
+                                    onClick={() => handleDeleteTask(task.id)}
+                                >
+                                    <DeleteOutlineIcon
+                                        sx={{
+                                            fontSize: "1.3rem",
+                                            color: theme.palette.error.main
+                                    }}/>
+                                </IconButton>
+                            </Tooltip>
                         </Box>
                     </Box>
                 }
@@ -105,7 +126,13 @@ export const TaskCard = (props: TaskCardProps) => {
                     },
                 }}>
                     {task.description && (
-                        <Typography variant="body2" sx={{color: "gray"}} gutterBottom>{task.description}</Typography>
+                        <Typography
+                            variant="body2"
+                            sx={{color: theme.palette.grey[500]}}
+                            gutterBottom
+                        >
+                            {task.description}
+                        </Typography>
                     )}
                 </CardContent>
             </Collapse>

@@ -1,22 +1,40 @@
-import React from "react";
+import React, {useCallback, useEffect} from "react";
 import Astronaut from "../../../assets/Astronaut-01.svg"
 import {useTheme} from "@mui/material";
 import {OpenIconSpeedDial} from "../../../components/generic/open-icon-speed-dial";
-import {useAppSelector} from "../../../app/hooks";
-import {selectTasks} from "../../../components/task/task-slice";
+import {useAppDispatch, useAppSelector, useSnackbarWithAction} from "../../../app/hooks";
+import {selectTasks, setNewTaskId} from "../../../components/task/task-slice";
 import Box from '@mui/material/Box';
 import Typography from "@mui/material/Typography";
 import {TaskCardsList} from "../../../components/task/task-cards-list/task-cards-list";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {TaskEditModal} from "../../../components/task/task-edit-modal/task-edit-modal";
 import {selectHeader} from "../../header/header-slice";
 import {HeaderModalProfile} from "../../header/header-modal-profile/header-modal-profile";
+import {HeaderModalProductivity} from "../../header/header-modal-productivity/header-modal-productivity";
 
 export const Content = () => {
+    const dispatch = useAppDispatch();
     const theme = useTheme();
-    const {open} = useAppSelector(selectHeader);
+    const {open, productivityOpen} = useAppSelector(selectHeader);
+    const {enqueueSnackbar, closeSnackbar} = useSnackbarWithAction();
     const location = useLocation();
-    const {tasks, selectedTask} = useAppSelector(selectTasks);
+    const navigate = useNavigate();
+    const {tasks, selectedTask, newTaskId} = useAppSelector(selectTasks);
+
+    useEffect(() => {
+        if (newTaskId) {
+            enqueueSnackbar("The task was successfully added" , () => {
+                closeSnackbar();
+                navigate(`/tasks/${newTaskId}`);
+                dispatch(setNewTaskId(null));
+            }, {
+                onClose: () => {
+                    dispatch(setNewTaskId(null));
+                }
+            });
+        }
+    }, [dispatch, newTaskId]);
 
     return (
         <Box sx={{
@@ -28,14 +46,16 @@ export const Content = () => {
             flex: 1,
             padding: "1rem 4rem",
         }}>
+            {productivityOpen && <HeaderModalProductivity />}
             {open && <HeaderModalProfile />}
-            {selectedTask && <TaskEditModal />}
+            {selectedTask && <TaskEditModal/>}
 
-            {tasks.length && location.pathname === "/tasks" ? (
+            {(tasks.length && location.pathname === "/tasks") ? (
                 <Box sx={{
                     width: "100%",
+                    height: "100%"
                 }}>
-                    <TaskCardsList />
+                    <TaskCardsList/>
                     <OpenIconSpeedDial/>
                 </Box>
             ) : (
@@ -48,8 +68,13 @@ export const Content = () => {
                         width: "100%",
                         height: "100%"
                     }}>
-                        <Box component="img" src={Astronaut} maxWidth="18rem" marginBottom="1.5rem"
-                             alt="content-image-astronaut"/>
+                        <Box
+                            component="img"
+                            src={Astronaut}
+                            maxWidth="20rem"
+                            marginBottom="1.5rem"
+                            alt="content-image-astronaut"
+                        />
                         <Typography variant="subtitle1" sx={{
                             color: theme.palette.text.primary,
                             textAlign: 'center',

@@ -2,8 +2,8 @@ import React, {useCallback, useEffect} from "react";
 import Dialog from '@mui/material/Dialog';
 import DialogContent from "@mui/material/DialogContent";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {selectTask, selectTasks} from "../task-slice";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {selectTask, selectTasks, setEditingTaskId} from "../task-slice";
+import {useNavigate, useParams} from "react-router-dom";
 import {TaskCardEdit} from "../task-cards-list/task-card-edit/task-card-edit";
 
 export const TaskEditModal = () => {
@@ -44,11 +44,9 @@ export const TaskEditModal = () => {
                     flexDirection: "row",
                     gap: "5rem",
                     justifyContent: "center",
-                    // padding: "0 3rem"
             }}
             >
                 <TaskCardEdit selectedTask={selectedTask}/>
-
             </DialogContent>
         </Dialog>
     );
