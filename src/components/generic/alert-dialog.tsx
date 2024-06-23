@@ -1,4 +1,10 @@
 import React from "react";
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 interface AlertDialogProps {
     title: string;
@@ -19,5 +25,25 @@ export const AlertDialog = (props: AlertDialogProps) => {
         onSuccess
     } = props;
 
-    return
+    return (
+        <Dialog
+            open
+            onClose={onCancel}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle>
+                {title}
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {text}
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onCancel}>{cancelButtonText}</Button>
+                <Button onClick={onSuccess}>{successButtonText}</Button>
+            </DialogActions>
+        </Dialog>
+    )
 }

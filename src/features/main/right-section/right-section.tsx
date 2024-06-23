@@ -45,7 +45,7 @@ export const RightSection = () => {
             backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
             left: 'auto',
             position: "relative",
-            borderLeft: `1px solid ${theme.palette.divider}`
+            // borderLeft: `1px solid ${theme.palette.divider}`
         }}>
             <Tabs
                 orientation="vertical"
@@ -88,6 +88,13 @@ export const RightSection = () => {
                         key={index}
                         aria-label={`${tasks.length} tasks`}
                     >
+                        {/*<NavLink*/}
+                        {/*    to={`/tasks/${date}`}*/}
+                        {/*    style={{*/}
+                        {/*        textDecoration: 'none',*/}
+                        {/*        color: 'inherit'*/}
+                        {/*    }}*/}
+                        {/*>*/}
                         <Tab
                             onClick={handleClickTab}
                             label={
@@ -98,11 +105,12 @@ export const RightSection = () => {
                                     justifyContent: 'center',
                                     gap: "1rem"
                                 }}>
-                                    <span>{date?.format('ddd')}</span>
-                                    <span>{date?.format('D')}</span>
+                                        <span>{date?.format('ddd')}</span>
+                                        <span>{date?.format('D')}</span>
                                 </Box>
                             }
                         />
+                    {/*</NavLink>*/}
                     </Tooltip>
                 ))}
             </Tabs>

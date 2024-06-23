@@ -9,9 +9,12 @@ export interface Task {
     description: string;
     completed: boolean;
     scheduledDate: number;
+    priority: string;
+    createdAt: number;
+    completedAt?: number | null;
 }
 
-interface TaskState {
+export interface TaskState {
     tasks: Task[];
     selectedTask: Task | null;
     newTaskId: string | null;
@@ -33,17 +36,19 @@ const taskSlice = createSlice({
             id: string,
             name: string,
             description: string,
-            scheduledDate: number
+            scheduledDate: number,
+            priority: string
         }>) => {
-            const {name, description, scheduledDate} = action.payload;
+            const {name, description, scheduledDate, priority} = action.payload;
 
             const updatedTasks = state.tasks.map(task => {
                 if (task.id === action.payload.id) {
                     return {
                         ...task,
-                        name: name,
-                        description: description,
-                        scheduledDate: scheduledDate,
+                        name,
+                        description,
+                        scheduledDate,
+                        priority,
                     };
                 }
                 return task;
@@ -53,13 +58,20 @@ const taskSlice = createSlice({
             localStorage.removeItem('tasks');
             localStorage.setItem('tasks', JSON.stringify(updatedTasks));
         },
-        addTask: (state, action: PayloadAction<{ name: string, description: string, date: number }>) => {
+        addTask: (state, action: PayloadAction<{
+            name: string,
+            description: string,
+            date: number,
+            priority: string,
+        }>) => {
             const newTask: Task = {
                 id: uuidv4(),
                 name: action.payload.name,
                 description: action.payload.description,
                 completed: false,
                 scheduledDate: action.payload.date,
+                priority: action.payload.priority,
+                createdAt: Date.now(),
             };
             state.tasks.push(newTask);
             localStorage.setItem('tasks', JSON.stringify(state.tasks));
@@ -79,6 +91,15 @@ const taskSlice = createSlice({
             const taskIndex = state.tasks.findIndex((task) => task.id === action.payload);
             if (taskIndex !== -1) {
                 state.tasks[taskIndex].completed = true;
+                state.tasks[taskIndex].completedAt = Date.now();
+                localStorage.setItem('tasks', JSON.stringify(state.tasks));
+            }
+        },
+        uncompleteTask: (state, action: PayloadAction<string>) => {
+            const taskIndex = state.tasks.findIndex((task) => task.id === action.payload);
+            if (taskIndex !== -1) {
+                state.tasks[taskIndex].completed = false;
+                state.tasks[taskIndex].completedAt = null;
                 localStorage.setItem('tasks', JSON.stringify(state.tasks));
             }
         },
@@ -98,9 +119,12 @@ export const {
     setNewTaskId,
     setEditingTaskId,
     completeTask,
+    uncompleteTask,
     selectTask,
     updateTask,
 } = taskSlice.actions;
 export const selectTasks = (state: RootState) => state.taskSlice;
+export const selectActiveTasks = (state: RootState) => state.taskSlice.tasks.filter((task) => !task.completed);
+export const selectCompletedTasks = (state: RootState) => state.taskSlice.tasks.filter((task) => task.completed);
 
 export default taskSlice.reducer;

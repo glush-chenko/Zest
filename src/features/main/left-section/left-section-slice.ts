@@ -7,7 +7,7 @@ export interface LeftSectionState {
 }
 
 const initialState: LeftSectionState = {
-    open: false
+    open: true
 };
 
 export const leftSectionSlice = createSlice({

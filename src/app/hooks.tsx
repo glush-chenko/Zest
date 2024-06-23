@@ -13,6 +13,7 @@ export const useSnackbarWithAction = () => {
     const open = (
         message: string,
         onButtonClick: () => void,
+        textButton: string,
         options?: OptionsObject,
     ) => {
         const defaultOptions: OptionsObject = {
@@ -31,7 +32,7 @@ export const useSnackbarWithAction = () => {
                     size="small"
                     onClick={onButtonClick}
                 >
-                    Edit
+                    {textButton}
                 </Button>
             ),
             ...defaultOptions,

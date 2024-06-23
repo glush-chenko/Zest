@@ -19,6 +19,7 @@ import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import DoneIcon from '@mui/icons-material/CheckCircleOutline';
 import {NavLink} from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
+import ListItem from "@mui/material/ListItem";
 
 export const LeftSection = () => {
     const dispatch = useAppDispatch();
@@ -33,6 +34,7 @@ export const LeftSection = () => {
     const completedTasks = useMemo(() => {
         return tasks.filter((task) => task.completed);
     }, [tasks]);
+    //переиспользовать
 
     const handleDrawerOpen = useCallback(() => {
         dispatch(toggleDrawer(true));
@@ -43,38 +45,65 @@ export const LeftSection = () => {
     }, [toggleDrawer, dispatch]);
 
     return (
-        <Drawer variant="permanent" open={drawer} anchor="left">
+        <Drawer
+            variant="permanent"
+            open={drawer}
+            anchor="left"
+            sx={{
+                '& .MuiDrawer-paper': {
+                    backgroundColor: theme.palette.mode === "light" ? theme.palette.grey[100] : theme.palette.grey[900],
+                    border: "none"
+                },
+            }}
+        >
             <Toolbar/>
-            <Box sx={{display: "flex", flexDirection: "column", overflow: "hidden"}}>
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: theme.palette.mode === "light" ? theme.palette.secondary.light : theme.palette.grey[900],
-                    color: theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
-                    minHeight: "3.5rem",
-                    padding: theme.spacing(0, 1),
-                    ...theme.mixins.toolbar,
-                }}>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: theme.palette.mode === "light" ? theme.palette.primary.main : theme.palette.grey[900],
+                        color: theme.palette.common.white,
+                        minHeight: "3.5rem",
+                        padding: theme.spacing(0, 1),
+                        ...theme.mixins.toolbar,
+                    }}
+                >
                     {drawer && (
-                        <Box sx={{display: "flex", flexGrow: 1, justifyContent: "center"}}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexGrow: 1,
+                                justifyContent: "center"
+                            }}
+                        >
                             <Typography variant="subtitle1">All Tasks</Typography>
                         </Box>
                     )}
-                    <IconButton onClick={drawer ? handleDrawerClose : handleDrawerOpen} color="inherit">
+                    <IconButton onClick={drawer ? handleDrawerClose : handleDrawerOpen} color="inherit"
+                                aria-label="button chevron">
                         {drawer ? <ChevronLeftIcon sx={{fontSize: "1.3rem"}}/> :
                             <ChevronRightIcon sx={{fontSize: "1.3rem"}}/>}
                     </IconButton>
                 </Box>
 
-                <Divider/>
-
-                <Box sx={{overflow: "auto"}}>
+                <Box
+                    sx={{
+                        overflow: "auto",
+                    }}
+                >
                     {drawer && <Typography
                         variant="subtitle2"
                         gutterBottom
                         sx={{
-                            color: theme.palette.warning.main,
+                            color: theme.palette.primary.light,
                             display: "flex",
                             gap: "0.5rem",
                             padding: '0.5rem 1rem',
@@ -85,7 +114,6 @@ export const LeftSection = () => {
                         In progress:
                     </Typography>}
 
-                    {/*<Tooltip title={task.name} placement="right" arrow>*/}
                     <List
                         sx={{
                             marginLeft: drawer ? "0.5rem" : 0,
@@ -97,7 +125,7 @@ export const LeftSection = () => {
                             </Box>
                         )}
                         {activeTasks.map((task) => (
-                            <Tooltip title={task.name} placement="right" key={task.id}>
+                            <Tooltip title={task.name} placement="right" key={task.id} arrow>
                                 <NavLink
                                     to={`/tasks/${task.id}`}
                                     style={{
@@ -107,7 +135,6 @@ export const LeftSection = () => {
                                 >
                                     <LeftSectionListItem
                                         task={task}
-                                        key={task.id}
                                         icon={CircleOutlinedIcon}
                                         done={false}
                                     />
@@ -122,7 +149,7 @@ export const LeftSection = () => {
                         variant="subtitle2"
                         gutterBottom
                         sx={{
-                            color: theme.palette.success.light,
+                            color: theme.palette.success.main,
                             display: "flex",
                             gap: "0.5rem",
                             padding: '0.5rem 1rem',
@@ -144,9 +171,9 @@ export const LeftSection = () => {
                             </Box>
                         )}
                         {completedTasks.map((task) => (
-                            <Tooltip title={task.name} placement="right" key={task.id}>
+                            <Tooltip title={task.name} placement="right" key={task.id} arrow>
                                 <NavLink
-                                    to={`/tasks/${task.id}`}
+                                    to={`/activity/${task.id}`}
                                     style={{
                                         textDecoration: 'none',
                                         color: 'inherit'

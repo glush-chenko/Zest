@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from "react";
+import React, {useCallback, useEffect, useMemo} from "react";
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -13,54 +13,64 @@ import {FormControlLabel, useTheme} from "@mui/material";
 import {ThemeSwitch} from "../../../components/styled/theme-switch";
 import logo from "../../../assets/zest-logo.png"
 import logo2 from "../../../assets/zest-logo2.png"
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {useAppDispatch, useAppSelector, useSnackbarWithAction} from "../../../app/hooks";
 import {toggleTheme} from "../../../theme/theme-provider/theme-provider-slice";
 import {AppBar} from "../../../components/styled/app-bar";
 import {selectDrawerOpen} from "../../main/left-section/left-section-slice";
 import {NavLink, useLocation} from "react-router-dom";
-import {selectHeader, setImageSrc, toggleHeaderProductivity, toggleHeaderProfile} from "../header-slice";
+import {selectHeader, setAvatarSrc, setGoalForDay} from "../header-slice";
+import {selectTasks} from "../../../components/task/task-slice";
+import {selectRightSection} from "../../main/right-section/right-section-slice";
+import {HeaderSearch} from "../header-search/header-search";
 
-const PAGES = ['tasks', 'about', 'ideas', 'contact'];
-const SETTINGS = ['Profile', 'Productivity', 'Dashboard'];
+enum SETTINGS {
+    PROFILE = 'Profile',
+    PRODUCTIVITY = "Productivity",
+}
+
+const PAGES = ['tasks', 'activity', 'about', 'contact'];
+const SETTINGS_MENU_ITEMS = [SETTINGS.PROFILE, SETTINGS.PRODUCTIVITY];
 
 export const Navigation = () => {
-    const location = useLocation();
     const theme = useTheme();
     const dispatch = useAppDispatch();
+    const location = useLocation();
     const drawer = useAppSelector(selectDrawerOpen);
-    const {src} = useAppSelector(selectHeader);
-    // const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+    const {tasks} = useAppSelector(selectTasks);
+    const {selectedDate} = useAppSelector(selectRightSection);
+    const {avatarSrc, goalForDay} = useAppSelector(selectHeader);
+    const {enqueueSnackbar, closeSnackbar} = useSnackbarWithAction();
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+
+    const completedTasksForDay = useMemo(() => {
+        return tasks.filter((t) => t.completed && t.scheduledDate === selectedDate).length;
+    }, [tasks, selectedDate]);
 
     useEffect(() => {
         const savedAvatar = localStorage.getItem('avatarSrc');
         if (savedAvatar) {
-            dispatch(setImageSrc(savedAvatar));
+            dispatch(setAvatarSrc(savedAvatar));
         }
-    }, [dispatch]);
 
-    // const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    //     setAnchorElNav(event.currentTarget);
-    // };
+        const savedGoal = localStorage.getItem('goal');
+        if (savedGoal) {
+            dispatch(setGoalForDay(Number(savedGoal)));
+        }
+
+        if (completedTasksForDay === goalForDay) {
+            enqueueSnackbar("You have successfully completed all the tasks for today", () => {
+                closeSnackbar();
+            }, "Close");
+        }
+    }, [dispatch, completedTasksForDay, goalForDay]);
+
     const handleOpenUserMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
-        dispatch(toggleHeaderProfile(false));
-        // dispatch(toggleHeaderProductivity(false));
-    }, [dispatch]);
+    }, []);
 
-    // const handleCloseNavMenu = () => {
-    //     setAnchorElNav(null);
-    // };
-
-    const handleCloseUserMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
-        const text = (event.target as HTMLElement).textContent;
-        if (text === "Profile") {
-            dispatch(toggleHeaderProfile(true));
-        } else if (text === "Productivity") {
-            dispatch(toggleHeaderProductivity(true));
-        }
+    const handleCloseUserMenu = useCallback(() => {
         setAnchorElUser(null);
-    }, [dispatch]);
+    }, []);
 
     const handleChangeTheme = useCallback(() => {
         dispatch(toggleTheme());
@@ -71,7 +81,8 @@ export const Navigation = () => {
             position="static"
             open={drawer}
             sx={{
-                boxShadow: "none"
+                boxShadow: "none",
+                // backgroundColor: theme.palette.mode === "dark" ? theme.palette.grey[900] : theme.palette.secondary.main
             }}
         >
             <Container maxWidth={false}>
@@ -89,12 +100,12 @@ export const Navigation = () => {
                     >
                     </Box>
 
-                    <Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}/>
+                    {/*<Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}/>*/}
                     <Typography
                         variant="h5"
                         noWrap
                         component="a"
-                        href="#app-bar-with-responsive-menu"
+                        href="/"
                         sx={{
                             mr: 2,
                             display: {xs: 'flex', md: 'none'},
@@ -110,7 +121,13 @@ export const Navigation = () => {
                     </Typography>
 
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        <NavLink to="/" style={{textDecoration: 'none'}}>
+                        <NavLink
+                            to="/"
+                            style={{
+                                textDecoration: 'none',
+                                color: 'inherit'
+                            }}
+                        >
                             <Button sx={{my: 2, color: 'white', display: 'block', margin: 0}}>
                                 Home
                             </Button>
@@ -120,12 +137,17 @@ export const Navigation = () => {
                                 to={`/${page}`}
                                 style={{
                                     textDecoration: 'none',
+                                    color: 'inherit'
                                 }}
                                 key={`navigation-link-${page}`}
                             >
                                 <Button
-                                    // onClick={}
-                                    sx={{my: 2, color: theme.palette.common.white, display: 'block', margin: 0}}
+                                    sx={{
+                                        my: 2,
+                                        color: theme.palette.common.white,
+                                        display: 'block',
+                                        margin: 0
+                                    }}
                                 >
                                     {page}
                                 </Button>
@@ -133,7 +155,9 @@ export const Navigation = () => {
                         ))}
                     </Box>
 
-                    {!(location && location.pathname === "/about") && (
+                    <Box sx={{display: "flex", gap: "1rem"}}>
+                        <HeaderSearch />
+
                         <FormControlLabel
                             control={
                                 <ThemeSwitch
@@ -143,39 +167,54 @@ export const Navigation = () => {
                                     color="primary"
                                 />
                             }
+                            aria-label={theme.palette.mode === 'dark' ? 'Dark Theme' : 'Light Theme'}
                             label=""
+                            sx={{margin: 0}}
                         />
-                    )}
 
-                    <Box sx={{flexGrow: 0}}>
-                        {!(location && location.pathname === "/about") && (<Tooltip title="Open settings">
-                            <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                <Avatar src={src}/>
-                            </IconButton>
-                        </Tooltip>)}
-                        <Menu
-                            sx={{mt: '3rem'}}
-                            anchorEl={anchorElUser}
-                            anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            open={Boolean(anchorElUser)}
-                            onClose={handleCloseUserMenu}
-                        >
-                            {SETTINGS.map((setting, index) => (
-                                <MenuItem
-                                    key={index}
-                                    onClick={handleCloseUserMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
+                        <Box sx={{flexGrow: 0}}>
+                            <Tooltip title="Open settings">
+                                <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                                    <Avatar src={avatarSrc} alt="avatar image"/>
+                                </IconButton>
+                            </Tooltip>
+                            <Menu
+                                sx={{mt: '3rem'}}
+                                anchorEl={anchorElUser}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                open={Boolean(anchorElUser)}
+                                onClose={handleCloseUserMenu}
+                            >
+                                {SETTINGS_MENU_ITEMS.map((setting, index) => (
+                                    <NavLink
+                                        state={{
+                                            previousRoute: location.pathname,
+                                        }}
+                                        to={`/${setting.toLowerCase()}`}
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: 'inherit'
+                                        }}
+                                        key={`navigation-link-${setting}`}
+                                    >
+                                        <MenuItem
+                                            key={index}
+                                            onClick={handleCloseUserMenu}
+                                        >
+                                            <Typography textAlign="center">{setting}</Typography>
+                                        </MenuItem>
+                                    </NavLink>
+                                ))}
+                            </Menu>
+                        </Box>
                     </Box>
                 </Toolbar>
             </Container>

@@ -35,8 +35,7 @@ export const OpenIconSpeedDial = () => {
                             }
                         }
                     }}
-                >
-                </SpeedDial>
+                />
             </NavLink>
         </Box>
     );

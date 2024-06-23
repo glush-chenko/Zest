@@ -2,38 +2,33 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "../../app/store";
 
 export interface HeaderState {
-    open: boolean;
-    productivityOpen: boolean;
-    src: string;
+    avatarSrc: string;
+    goalForDay: number;
 }
 
 const initialState: HeaderState = {
-    open: false,
-    productivityOpen: false,
-    src: "",
+    avatarSrc: "",
+    goalForDay: 5,
 };
 
 export const headerSlice = createSlice({
     name: 'headerSlice',
     initialState,
     reducers: {
-        toggleHeaderProfile: (state, action: PayloadAction<boolean>) => {
-            state.open = action.payload;
-        },
-        toggleHeaderProductivity: (state, action: PayloadAction<boolean>) => {
-            state.productivityOpen = action.payload;
-        },
-        setImageSrc: (state, action: PayloadAction<string>) => {
-            state.src = action.payload;
+        setAvatarSrc: (state, action: PayloadAction<string>) => {
+            state.avatarSrc = action.payload;
             localStorage.setItem('avatarSrc', action.payload);
         },
+        setGoalForDay: (state, action: PayloadAction<number>) => {
+            state.goalForDay = action.payload;
+            localStorage.setItem('goal', `${action.payload}`);
+        }
     },
 });
 
 export const {
-    toggleHeaderProfile,
-    setImageSrc,
-    toggleHeaderProductivity
+    setAvatarSrc,
+    setGoalForDay,
 } = headerSlice.actions;
 export const selectHeader = (state: RootState) => state.headerSlice;
 
