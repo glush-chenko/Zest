@@ -1,4 +1,4 @@
-import React, {UIEventHandler, useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Fade, useTheme} from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -7,65 +7,48 @@ import workPeople from "../../assets/work-people.jpg"
 import people from "../../assets/people.jpg"
 import desktop from "../../assets/desktop.jpg"
 import communityPeople from "../../assets/community-people.jpg"
-import {ExtendedPaletteOptions} from "../../theme/theme-provider/theme-provider";
-import {Theme} from "@mui/material/styles";
 
 const AboutPage: React.FC = () => {
-    const theme: Theme & { palette: ExtendedPaletteOptions } = useTheme();
+    const theme = useTheme();
     const [isVisible, setIsVisible] = useState(false);
+    const [isVisibleTwoSection, setIsVisibleTwoSection] = useState(false);
+    const [isVisibleThreeSection, setIsVisibleThreeSection] = useState(false);
 
-    const handleScroll = (event:  React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const handleScroll = (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
         const scrollPosition = event.currentTarget.scrollTop;
-        // const windowHeight = window.innerHeight;
-        console.log(scrollPosition)
 
-        if (scrollPosition > 30) {
+        if (scrollPosition > 400) {
             setIsVisible(true);
-        } else {
-            setIsVisible(false);
+        }
+
+        if (scrollPosition > 800) {
+            setIsVisibleTwoSection(true);
+        }
+
+        if (scrollPosition > 1300) {
+            setIsVisibleThreeSection(true);
         }
     };
-    //
-    // useEffect(() => {
-    //     const handleScroll = () => {
-    //         const scrollPosition = window.scrollY;
-    //         const windowHeight = window.innerHeight;
-    //         console.log(scrollPosition)
-    //
-    //         if (scrollPosition > 100) {
-    //             setIsVisible(true);
-    //         } else {
-    //             setIsVisible(false);
-    //         }
-    //     };
-    //
-    //     window.addEventListener('scroll', handleScroll);
-    //
-    //     return () => {
-    //         window.removeEventListener('scroll', handleScroll);
-    //     };
-    // }, [window]);
-
 
     return (
         <Box
             sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "1rem",
-            height: "100%",
-            overflow: "auto",
-            backgroundColor: theme.palette.beige.main,
-        }}
-        onScroll={handleScroll}
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "3rem",
+                height: "100%",
+                overflow: "auto",
+                backgroundColor: theme.palette.mode === "dark" ? "transparent" : theme.palette.beige.main,
+            }}
+            onScroll={handleScroll}
         >
             <Box
                 sx={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    padding: "1rem 5rem",
+                    padding: "1rem 5rem 3rem 5rem",
                 }}
             >
                 <Typography variant="h3">
@@ -88,32 +71,114 @@ const AboutPage: React.FC = () => {
                 src={people}
                 alt="smart people"
                 sx={{
-                    height: "30rem",
-                    width: "40rem",
-                    border: "1px solid",
+                    height: "32rem",
+                    width: "44rem",
+                    border: theme.palette.mode === "dark" ? `3px solid ${theme.palette.secondary.light}` : `3px solid ${theme.palette.grey[500]}`,
                     borderRadius: "7rem",
-                    marginBottom: "5rem"
+                    marginBottom: "7rem"
                 }}
             />
 
             <Box
                 sx={{
                     display: "flex",
-                    // overflow: 'auto',
                     flexDirection: "column",
-                    gap: "2rem",
+                    gap: "5rem",
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
                     transition: 'opacity 0.5s, transform 0.5s',
+                    width: "100%"
                 }}
             >
-
                 <Fade in={isVisible}>
                     <Box
                         sx={{
                             display: 'flex',
-                            flexDirection: 'column',
                             gap: '2rem',
+                            justifyContent: "flex-start",
+                            paddingLeft: "5rem",
+                            paddingRight: "38rem"
+                        }}
+                    >
+                        <Box
+                            component="img"
+                            src={communityPeople}
+                            alt="smart people"
+                            sx={{
+                                height: "26rem",
+                                width: "26rem",
+                                border: theme.palette.mode === "dark" ? `3px solid ${theme.palette.secondary.light}` : `3px solid ${theme.palette.grey[500]}`,
+                                borderRadius: "3rem",
+                            }}
+                        />
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                paddingTop: "2rem",
+                                // gap: "1rem"
+                            }}
+                        >
+                            <Typography variant="h3">Task Management:</Typography>
+                            <Typography variant="h3">Streamlining Your Productivity.</Typography>
+                            <br/>
+                            <Typography variant="h5" sx={{color: theme.palette.grey[600]}}>Easily add, edit and track
+                                your tasks.</Typography>
+                            <br/>
+                            <Typography variant="h5" sx={{color: theme.palette.grey[600]}}>Stay organized, prioritize
+                                your work, and achieve your goals more efficiently from anywhere.</Typography>
+                        </Box>
+                    </Box>
+                </Fade>
+
+                <Fade in={isVisibleTwoSection}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            gap: '2rem',
+                            justifyContent: "flex-end",
+                            paddingRight: "5rem"
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                paddingTop: "2rem",
+                                // gap: "1rem"
+                                paddingLeft: "35rem"
+                            }}
+                        >
+                            <Typography variant="h3">Performance Analytics:</Typography>
+                            <Typography variant="h3">Unlock Your Potential.</Typography>
+                            <br/>
+                            <Typography variant="h5" sx={{color: theme.palette.grey[600]}}>Track your performance
+                                metrics and analyze data-driven insights to identify areas for improvement.</Typography>
+                            <br/>
+                            <Typography variant="h5" sx={{color: theme.palette.grey[600]}}>Use this information to make
+                                informed decisions and optimize your performance to reach new heights.</Typography>
+                        </Box>
+                        <Box
+                            component="img"
+                            src={desktop}
+                            alt="smart people"
+                            sx={{
+                                height: "26rem",
+                                width: "33rem",
+                                border: theme.palette.mode === "dark" ? `3px solid ${theme.palette.secondary.light}` : `3px solid ${theme.palette.grey[500]}`,
+                                borderRadius: "3rem",
+                            }}
+                        />
+                    </Box>
+                </Fade>
+
+                <Fade in={isVisibleThreeSection}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            gap: '2rem',
+                            justifyContent: "flex-start",
+                            paddingLeft: "5rem"
                         }}
                     >
                         <Box
@@ -121,40 +186,34 @@ const AboutPage: React.FC = () => {
                             src={workPeople}
                             alt="smart people"
                             sx={{
-                                height: "15rem",
-                                width: "15rem",
-                                border: "1px solid",
+                                height: "26rem",
+                                width: "26rem",
+                                border: theme.palette.mode === "dark" ? `3px solid ${theme.palette.secondary.light}` : `3px solid ${theme.palette.grey[500]}`,
                                 borderRadius: "3rem",
                             }}
                         />
-                        <Typography variant="body1">Variant</Typography>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                paddingTop: "2rem",
+                                // gap: "1rem"
+                                paddingRight: "32rem"
+                            }}
+                        >
+                            <Typography variant="h3">Planning and Calendar:</Typography>
+                            <Typography variant="h3">Mastering Time Management.</Typography>
+                            <br/>
+                            <Typography variant="h5" sx={{color: theme.palette.grey[600]}}>Organize your time and
+                                prioritize.</Typography>
+                            <br/>
+                            <Typography variant="h5" sx={{color: theme.palette.grey[600]}}>Utilize our comprehensive
+                                planning and calendar features to organize your time, prioritize your tasks, and stay on
+                                top of your schedule.</Typography>
+                        </Box>
                     </Box>
                 </Fade>
-
-                <Box
-                    component="img"
-                    src={communityPeople}
-                    alt="smart people"
-                    sx={{
-                        height: "15rem",
-                        width: "15rem",
-                        border: "1px solid",
-                        borderRadius: "3rem",
-                    }}
-                />
-                <Box
-                    component="img"
-                    src={desktop}
-                    alt="smart people"
-                    sx={{
-                        height: "15rem",
-                        width: "15rem",
-                        border: "1px solid",
-                        borderRadius: "3rem",
-                    }}
-                />
             </Box>
-
         </Box>
     )
 }

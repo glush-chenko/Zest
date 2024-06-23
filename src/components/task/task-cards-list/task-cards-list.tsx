@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction} from "react";
+import React, {useMemo} from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import {useAppSelector} from "../../../app/hooks";
@@ -9,12 +9,17 @@ import dayjs from "dayjs";
 import dogSwimming from "../../../assets/dog-swimming.svg"
 import {useTheme} from "@mui/material";
 import {TaskCardEdit} from "./task-card-edit/task-card-edit";
+import {sortTasksByPriority} from "../../../utils/sortTasksByPriority";
+import axios from "axios";
 
 export const TaskCardsList = () => {
     const {tasks, editingTaskId} = useAppSelector(selectTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
-    const hasTaskOnSelectedDate = tasks.some((task) => task.scheduledDate === selectedDate);
     const theme = useTheme();
+
+    const hasTaskOnSelectedDate = useMemo(() => {
+        return tasks.some((task) => (task.scheduledDate === selectedDate) && !task.completed);
+    }, [tasks, selectedDate]);
 
     return (
         <>
@@ -30,8 +35,8 @@ export const TaskCardsList = () => {
                 </Typography>
 
                 {hasTaskOnSelectedDate ? (
-                    tasks.filter((t) => !t.completed).map((task) => {
-                        if (task.scheduledDate === selectedDate) {
+                    sortTasksByPriority(tasks).filter((t) => !t.completed).map((task) => {
+                        if (task.scheduledDate === selectedDate){
                             return (
                                 <Box key={task.id}>
                                     {editingTaskId === task.id ? (
@@ -41,7 +46,6 @@ export const TaskCardsList = () => {
                                     ) : (
                                         <TaskCard
                                             task={task}
-                                            key={task.id}
                                         />
                                     )}
                                 </Box>

@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useMemo} from "react";
-import {useAppDispatch, useAppSelector, useSnackbarWithAction} from "../../../app/hooks";
+import React, {useCallback, useMemo} from "react";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {
     selectTasks,
     selectTask,
@@ -14,11 +14,11 @@ import {TaskButtons} from "../task-buttons/task-buttons";
 import {useNavigate} from "react-router-dom";
 import {TaskStepper} from "../task-stepper/task-stepper";
 import dayjs, {Dayjs} from "dayjs";
-
-const ADD_TASK_SNACKBAR_KEY = "add-task-snackbar-key";
+import {useTheme} from "@mui/material";
 
 export const TaskModal = () => {
     const dispatch = useAppDispatch();
+    const theme = useTheme();
     const navigate = useNavigate();
     const {tasks, newTaskId} = useAppSelector(selectTasks);
     const [currentStep, setCurrentStep] = React.useState(0);
@@ -44,6 +44,7 @@ export const TaskModal = () => {
     const [description, setDescription] = React.useState("");
     const [date, setDate] = React.useState<Dayjs | null>(dayjs());
     const [nameError, setNameError] = React.useState<boolean>(false);
+    const [selectedPriority, setSelectedPriority] = React.useState("Priority 4");
 
 
     const handleNameChange = useCallback((name: string) => {
@@ -57,6 +58,10 @@ export const TaskModal = () => {
 
     const handleDateChange = useCallback((date: Dayjs | null) => {
         setDate(date);
+    }, []);
+
+    const handlePriorityChange = useCallback((priority: string) => {
+        setSelectedPriority(priority);
     }, []);
 
     const handleClose = useCallback(() => {
@@ -94,12 +99,13 @@ export const TaskModal = () => {
         dispatch(addTask({
             name,
             description,
-            date: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf()
+            date: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
+            priority: selectedPriority,
         }));
 
         
         navigate('/tasks');
-    }, [dispatch, name, description, date, newTaskId]);
+    }, [dispatch, name, description, date, newTaskId, selectedPriority]);
 
     const disableNextButton = useMemo(() => {
         return currentStep === 0 && name.trim() === '';
@@ -111,18 +117,23 @@ export const TaskModal = () => {
             onClose={handleClose}
             fullWidth={true}
             maxWidth='md'
-            PaperProps={{
-                component: 'form',
-                onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-                    event.preventDefault();
-                    handleClose();
-                },
-            }}
         >
-            <DialogTitle>Create Task</DialogTitle>
+            <DialogTitle
+                sx={{
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText
+            }}
+            >
+                Create Task
+            </DialogTitle>
 
             <DialogContent
-                sx={{display: "flex", flexDirection: "row", gap: "5rem", padding: "0 3rem"}}
+                sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "5rem",
+                    padding: "0 3rem",
+            }}
             >
                 <TaskStepper steps={steps} currentStep={currentStep}/>
                 <TaskNameTextField
@@ -131,11 +142,12 @@ export const TaskModal = () => {
                     description={description}
                     date={date}
                     nameError={nameError}
+                    priority={selectedPriority}
                     onNameChange={handleNameChange}
                     onDateChange={handleDateChange}
                     onDescriptionChange={handleDescriptionChange}
+                    onPriorityChange={handlePriorityChange}
                 />
-                {/*<TaskButton/>*/}
             </DialogContent>
 
             <DialogActions>

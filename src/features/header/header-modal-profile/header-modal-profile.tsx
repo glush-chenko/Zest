@@ -2,44 +2,43 @@ import React, {useCallback} from "react";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Dialog from "@mui/material/Dialog";
-import {selectHeader, setImageSrc, toggleHeaderProfile} from "../header-slice";
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {setAvatarSrc} from "../header-slice";
+import {useAppDispatch} from "../../../app/hooks";
 import {images} from "../../../assets/avatars/images";
 import Box from "@mui/material/Box";
 import {useTheme} from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import {useLocation, useNavigate} from "react-router-dom";
 
 export const HeaderModalProfile = () => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
     const theme = useTheme();
-    const {open} = useAppSelector(selectHeader);
 
     const handleClose = useCallback(() => {
-        dispatch(toggleHeaderProfile(false));
-    }, [dispatch]);
+        navigate(location.state?.previousRoute || "/");
+    }, [navigate]);
 
     const handleClickAvatar = useCallback((event: React.MouseEvent<HTMLImageElement>) => {
         const imageSrc = (event.target as HTMLImageElement).src;
-        dispatch(setImageSrc(imageSrc));
-        dispatch(toggleHeaderProfile(false));
+        dispatch(setAvatarSrc(imageSrc));
+        handleClose();
     }, [dispatch])
 
     return (
         <Dialog
-            open={open}
+            open
             onClose={handleClose}
             fullWidth={true}
             maxWidth="sm"
             PaperProps={{
-                component: 'div',
-                onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-                    event.preventDefault();
-                    handleClose();
-                },
                 sx: {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    gap: "1rem",
                     borderRadius: "1rem",
                     '& ::-webkit-scrollbar': {
                         width: '0.6rem',
@@ -54,46 +53,64 @@ export const HeaderModalProfile = () => {
             <DialogTitle
                 sx={{
                     display: "flex",
-                    justifyContent: "center",
+                    justifyContent: "space-between",
                     backgroundColor: theme.palette.primary.main,
-                    width: "100%"
+                    width: "100%",
+                    height: "4rem",
+                    color: theme.palette.primary.contrastText,
                 }}
             >
-                Select an avatar for your profile
+                <Typography variant="h6">Select an avatar for your profile</Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                >
+                    <CloseIcon sx={{fontSize: "1.3rem", color: `${theme.palette.primary.contrastText}`}}/>
+                </IconButton>
             </DialogTitle>
 
             <DialogContent
                 sx={{
+                    padding: 0,
+                    backgroundColor: theme.palette.grey[300],
+                }}
+            >
+                <Box sx={{
                     display: "flex",
                     justifyContent: "center",
                     flexWrap: "wrap",
                     gap: 2,
-                    maxHeight: "55vh",
-                }}
-            >
-                {images.map((image, index) => (
-                    <Box
-                        key={`image ${index}`}
-                        sx={{
-                            flex: "0 0 22%",
-                            height: "auto",
-                        }}
-                    >
+                    maxHeight: "37rem",
+                    padding: "1rem"
+                }}>
+                    {images.map((image, index) => (
                         <Box
-                            component="img"
-                            src={image}
-                            alt={`Avatar ${index}`}
-                            onClick={handleClickAvatar}
+                            key={`image ${index}`}
                             sx={{
-                                width: "100%",
+                                flex: "0 0 22%",
                                 height: "auto",
-                                border: "1px solid gray",
-                                borderRadius: "4rem",
-                                backgroundColor: theme.palette.primary.dark
                             }}
-                        />
-                    </Box>
-                ))}
+                        >
+                            <Box
+                                component="img"
+                                src={image}
+                                alt={`Avatar ${image}`}
+                                onClick={handleClickAvatar}
+                                sx={{
+                                    width: "100%",
+                                    height: "auto",
+                                    // border: `1px solid ${theme.palette.grey[500]}`,
+                                    borderRadius: "4rem",
+                                    backgroundColor: theme.palette.common.white,
+                                    cursor: "pointer",
+                                    "&:hover": {
+                                        opacity: 0.8
+                                    },
+                                }}
+                            />
+                        </Box>
+                    ))}
+                </Box>
             </DialogContent>
         </Dialog>
     );

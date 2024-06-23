@@ -4,17 +4,46 @@ import Box from "@mui/material/Box";
 import {isStepOptional} from "../../../utils/is-step-optional";
 
 interface TaskButtonsProps {
-    onBack: () => void;
-    onNext: () => void;
-    onSkip: () => void;
-    addTask: () => void;
+    /**
+     * The current step in a multistep process.
+     */
     currentStep: number;
+    /**
+     * A flag indicating whether the current step is the last one.
+     */
     isLastStep: boolean;
+    /**
+     * A flag indicating whether the Next button should be disabled.
+     */
     disabledNext: boolean;
+    /**
+     * Function called when the "Back" button is clicked.
+     */
+    onBack: () => void;
+    /**
+     * A function called when the "Next" button is clicked.
+     */
+    onNext: () => void;
+    /**
+     * Function called when the "Skip" button is clicked.
+     */
+    onSkip: () => void;
+    /**
+     * A function called when the "Add task" button is clicked.
+     */
+    addTask: () => void;
 }
 
 export const TaskButtons = (props: TaskButtonsProps) => {
-    const {onBack, onNext, onSkip, addTask, isLastStep, currentStep, disabledNext} = props;
+    const {
+        isLastStep,
+        currentStep,
+        disabledNext,
+        onBack,
+        onNext,
+        onSkip,
+        addTask,
+    } = props;
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'row', pt: 2, justifyContent: "space-between"}}>
@@ -35,16 +64,6 @@ export const TaskButtons = (props: TaskButtonsProps) => {
                     </Button>
                 )}
                 {isLastStep ? (
-                    // <Snackbar
-                    //     message="Task added successfully"
-                    //     variant="success"
-                    //     ButtonComponent={(
-                    //         <Button onClick={addTask} disabled={disabledNext} variant="contained">
-                    //             Add a task
-                    //         </Button>
-                        // )}
-                    // />
-
                     <Button onClick={addTask} disabled={disabledNext} variant="contained">
                         Add a task
                     </Button>
