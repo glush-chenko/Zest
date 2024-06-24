@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useMemo} from "react";
 import {useSearchParams} from "react-router-dom";
 import Box from "@mui/material/Box";
 import {useAppSelector} from "../../app/hooks";
@@ -12,16 +12,19 @@ export const SearchPage = () => {
     const {tasks} = useAppSelector(selectTasks);
     const [searchParams] = useSearchParams()
     const taskNameToFind = searchParams.get("name");
+    const taskIdToFind = searchParams.get("id");
 
-    const filteredTasks = tasks.filter(task =>
-        task.name.toLowerCase().includes(taskNameToFind?.toLowerCase() || '')
-    );
+    const filteredTasks = useMemo(() => {
+        return tasks.filter(task => {
+            return taskIdToFind ?
+                task.id === taskIdToFind :
+                task.name.toLowerCase().includes(taskNameToFind?.toLowerCase() || '')
+        })
+    }, [tasks, taskIdToFind, taskNameToFind]);
+
     return (
         <Box
             sx={{
-                // display: 'flex',
-                // flexDirection: "column",
-                // gap: "1rem",
                 height: "100%",
                 width: "100%",
                 padding: "2rem 4rem",

@@ -1,7 +1,7 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useMemo} from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import {useAppSelector} from "../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {selectTasks} from "../task-slice";
 import {TaskCard} from "./task-card/task-card";
 import {selectRightSection} from "../../../features/main/right-section/right-section-slice";
@@ -11,11 +11,33 @@ import {useTheme} from "@mui/material";
 import {TaskCardEdit} from "./task-card-edit/task-card-edit";
 import {sortTasksByPriority} from "../../../utils/sortTasksByPriority";
 import axios from "axios";
+import {loadProjects, loadTasks, selectTodoistLoading, selectTodoistTasks} from "../../../api/todoist-api";
+import {SCREEN_NAMES, selectHeader} from "../../../features/header/header-slice";
 
 export const TaskCardsList = () => {
+    const dispatch = useAppDispatch();
     const {tasks, editingTaskId} = useAppSelector(selectTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
+    const {currentScreenName} = useAppSelector(selectHeader);
+    const data = useAppSelector(selectTodoistTasks)
+    const loading = useAppSelector(selectTodoistLoading)
     const theme = useTheme();
+
+    useEffect(() => {
+        switch (currentScreenName) {
+            case SCREEN_NAMES.HOME:
+                dispatch(loadProjects());
+                break;
+        }
+    }, [dispatch]);
+
+
+
+    // const res = dispatch(loadProjects());
+    // console.log(data)
+    // console.log(loading)
+
+
 
     const hasTaskOnSelectedDate = useMemo(() => {
         return tasks.some((task) => (task.scheduledDate === selectedDate) && !task.completed);
