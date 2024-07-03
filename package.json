@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@doist/todoist-api-typescript": "^3.0.3",
     "@fontsource/roboto": "^5.0.13",
     "@mui/icons-material": "^5.15.17",
@@ -64,7 +65,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@chromatic-com/storybook": "^1.5.0",
     "@storybook/addon-essentials": "^8.1.6",
     "@storybook/addon-interactions": "^8.1.6",
