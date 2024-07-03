@@ -40,6 +40,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "copyfiles _redirects build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "storybook": "storybook dev -p 6006",
@@ -84,6 +85,7 @@
     "@types/uuid": "^9.0.8",
     "babel-jest": "^29.7.0",
     "babel-preset-react-app": "^10.0.1",
+    "copyfiles": "^2.4.1",
     "eslint-plugin-storybook": "^0.8.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
