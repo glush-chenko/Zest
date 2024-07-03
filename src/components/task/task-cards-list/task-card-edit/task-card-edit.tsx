@@ -20,7 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {useAppDispatch} from "../../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../../app/hooks";
 import {useTheme} from "@mui/material";
 import {useNavigate} from "react-router-dom";
 import Tooltip from "@mui/material/Tooltip";
@@ -32,11 +32,11 @@ import {Pallete} from "../../../../theme/theme";
 import {
     closeTask,
     deleteTaskSync,
-    reopenTaskSync, syncTodosLoadTasks,
+    reopenTaskSync,
     updateTaskContent
 } from "../../../../api/todoist-api";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import {token} from "../../../../utils/auth";
+import {selectToken} from "../../../../pages/login/login-slice";
 
 export const PRIORITY = [
     {
@@ -67,6 +67,8 @@ interface TaskCardEditProps {
 
 export const TaskCardEdit = (props: TaskCardEditProps) => {
     const {selectedTask} = props;
+
+    const token = useAppSelector(selectToken)
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -114,7 +116,6 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                         priority: selectedPriority,
                     }
                 }))
-                dispatch(syncTodosLoadTasks());
             } else {
                 dispatch(updateTask({
                     id: selectedTask.id,

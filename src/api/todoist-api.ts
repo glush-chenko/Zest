@@ -20,7 +20,6 @@ const initialState: ZestState = {
     error: null
 };
 
-export const apiKey = localStorage.getItem('todoist_access_token');
 let lastSyncToken = localStorage.getItem("lastSyncToken");
 
 export const createTask = createAsyncThunk(
@@ -32,7 +31,7 @@ export const createTask = createAsyncThunk(
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Request-Id': uuidv4(),
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`
                 },
                 cache: "no-cache",
                 body: JSON.stringify(taskData)
@@ -60,7 +59,7 @@ export const updateTaskContent = createAsyncThunk(
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Request-Id': uuidv4(),
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`
                 },
                 cache: "no-cache",
                 body: JSON.stringify(data.content)
@@ -85,7 +84,7 @@ export const closeTask = createAsyncThunk(
             const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}/close`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`
                 },
                 cache: "no-cache"
             });
@@ -111,7 +110,7 @@ export const reopenTaskSync = createAsyncThunk(
             const response = await fetch('https://api.todoist.com/sync/v9/sync', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`,
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 cache: "no-cache",
@@ -150,7 +149,7 @@ export const deleteTaskSync = createAsyncThunk(
             const response = await fetch('https://api.todoist.com/sync/v9/sync', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`,
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
                 cache: "no-cache",
@@ -188,7 +187,7 @@ export const getCompletedTasks = createAsyncThunk(
         try {
             const response = await fetch('https://api.todoist.com/sync/v9/completed/get_all', {
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`,
                 },
                 cache: "no-cache"
             });
@@ -211,7 +210,7 @@ export const getActivityTaskById = createAsyncThunk(
         try {
             const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}`, {
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`
                 },
                 cache: "no-cache"
             });
@@ -235,7 +234,7 @@ export const syncTodosLoadTasks = createAsyncThunk(
             const response = await fetch('https://api.todoist.com/sync/v9/sync', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${localStorage.getItem('todoist_access_token')}`,
                     'Content-Type': 'application/json'
                 },
                 cache: "no-cache",
@@ -341,7 +340,7 @@ const todoistSlice = createSlice({
                             name: action.payload.content,
                             description: action.payload.description,
                             completed: action.payload.is_completed,
-                            scheduledDate: action.payload.due ? action.payload.due.date : null,
+                            scheduledDate: action.payload.due ? dayjs(action.payload.due.date).startOf("day").valueOf() : null,
                             priority: `${action.payload.priority}`,
                             createdAt: action.payload.created_at,
                             completedAt: null,

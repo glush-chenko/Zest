@@ -11,15 +11,19 @@ import {selectTasks} from "../../../components/task/task-slice";
 import {useNavigate} from "react-router-dom";
 import dayjs, {Dayjs} from "dayjs";
 import {selectTodoistTasks} from "../../../api/todoist-api";
-import {token} from "../../../utils/auth";
+import {selectToken} from "../../../pages/login/login-slice";
 
 export const RightSection = () => {
     const dispatch = useAppDispatch();
     const theme = useTheme();
     const navigate = useNavigate()
+
     const [value, setValue] = React.useState(0);
+
     const {tasks} = useAppSelector(selectTasks);
     const tasksAPI = useAppSelector(selectTodoistTasks);
+    const token = useAppSelector(selectToken);
+
     const weekDates = getWeekDates();
 
     useEffect(() => {

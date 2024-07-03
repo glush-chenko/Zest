@@ -73,12 +73,12 @@ export const LoginPage = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "0.5rem"
+                    gap: "1rem"
                 }}
             >
                 {isLoginMode ? (
                     <>
-                        <DialogContentText>
+                        <DialogContentText sx={{textAlign: "center"}}>
                             Log in with your Todoist account to access all features.
                         </DialogContentText>
                         <Button
@@ -91,10 +91,10 @@ export const LoginPage = () => {
                     </>
                 ) : (
                     <>
-                        <DialogContentText>
+                        <DialogContentText sx={{textAlign: "center"}}>
                             Use test access to try out the app without creating an account
                         </DialogContentText>
-                        <DialogContentText>
+                        <DialogContentText sx={{textAlign: "center"}}>
                             You will have limited access. All data may be lost
                         </DialogContentText>
                         <Button

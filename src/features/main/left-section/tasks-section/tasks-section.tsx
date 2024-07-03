@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Fragment, useMemo} from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
@@ -14,6 +14,7 @@ import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import {useTheme} from "@mui/material";
 import PublishedWithChangesOutlinedIcon from "@mui/icons-material/PublishedWithChangesOutlined";
 import Skeleton from "@mui/material/Skeleton";
+import {selectTodoistLoading} from "../../../../api/todoist-api";
 
 interface TasksSectionProps {
     active: boolean,
@@ -23,8 +24,14 @@ interface TasksSectionProps {
 
 export const TasksSection = (props: TasksSectionProps) => {
     const {active, tasks, isLoggedIn} = props;
-    const drawer = useAppSelector(selectDrawerOpen);
     const theme = useTheme();
+
+    const drawer = useAppSelector(selectDrawerOpen);
+    const loading = useAppSelector(selectTodoistLoading);
+
+    const showSkeleton = useMemo(() => {
+        return loading && isLoggedIn;
+    }, [loading, isLoggedIn]);
 
     return (
         <Box sx={{width: "100%"}}>
@@ -51,35 +58,47 @@ export const TasksSection = (props: TasksSectionProps) => {
                     padding: "0.5rem"
                 }}
             >
-                {(!tasks.length || !isLoggedIn) && (
+                {showSkeleton ? (
                     <Box sx={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
-                        {Array.from({ length: 10 }).map((_, index) => (
+                        {Array.from({length: 10}).map((_, index) => (
                             <Box key={index} sx={{display: "flex", gap: "0.5rem"}}>
                                 <Skeleton variant="circular" width={30} height={30}/>
-                                <Skeleton variant="rectangular" width={150} height={30} sx={{borderRadius: "0.5rem"}} />
+                                <Skeleton variant="rectangular" width={150} height={30} sx={{borderRadius: "0.5rem"}}/>
                             </Box>
                         ))}
                     </Box>
+                ) : (
+                    <>
+                        {!tasks.length && (
+                            <Box>
+                                <Typography variant="body1">
+                                    {(drawer && active) && "No active tasks"}
+                                    {(drawer && !active) && "No completed tasks"}
+                                </Typography>
+                            </Box>
+                        )}
+                        {tasks.map((task) => (
+                            <Tooltip title={task.name} placement="right" key={task.id} arrow>
+                                <NavLink
+                                    to={active ? `/tasks/${task.id}` : `/activity/${task.id}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    {isLoggedIn && (
+                                        <LeftSectionListItem
+                                            task={task}
+                                            icon={active ? CircleOutlinedIcon : DoneIcon}
+                                            done={!active}
+                                        />
+                                    )}
+                                </NavLink>
+                            </Tooltip>
+
+                        ))}
+                    </>
                 )}
-                {tasks.map((task) => (
-                    <Tooltip title={task.name} placement="right" key={task.id} arrow>
-                        <NavLink
-                            to={active ? `/tasks/${task.id}` : `/activity/${task.id}`}
-                            style={{
-                                textDecoration: 'none',
-                                color: 'inherit'
-                            }}
-                        >
-                            {isLoggedIn && (
-                                <LeftSectionListItem
-                                    task={task}
-                                    icon={active ? CircleOutlinedIcon : DoneIcon}
-                                    done={!active}
-                                />
-                            )}
-                        </NavLink>
-                    </Tooltip>
-                ))}
             </List>
         </Box>
     )

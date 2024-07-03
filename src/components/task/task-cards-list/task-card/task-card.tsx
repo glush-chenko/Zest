@@ -11,7 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Collapse from "@mui/material/Collapse";
 import CardContent from "@mui/material/CardContent";
 import Card from "@mui/material/Card";
-import {useAppDispatch} from "../../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../../app/hooks";
 import {useTheme} from "@mui/material";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {AlertDialog} from "../../../generic/alert-dialog";
@@ -19,9 +19,9 @@ import Divider from '@mui/material/Divider';
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import {PRIORITY} from "../task-card-edit/task-card-edit";
-import {token} from "../../../../utils/auth";
 import {closeTask, deleteTaskSync} from "../../../../api/todoist-api";
 import {useNavigate} from "react-router-dom";
+import {selectToken} from "../../../../pages/login/login-slice";
 
 export interface TaskCardProps {
     /**
@@ -36,6 +36,8 @@ export const TaskCard = (props: TaskCardProps) => {
     const dispatch = useAppDispatch();
     const theme = useTheme();
     const navigate = useNavigate();
+
+    const token = useAppSelector(selectToken)
 
     const [expanded, setExpanded] = React.useState(false);
     const [openAlertDialog, setOpenAlertDialog] = React.useState(false);

@@ -7,10 +7,11 @@ import Box from "@mui/material/Box";
 import AboutPage from "../pages/about/about-page";
 import {OpenIconSpeedDial} from "../components/generic/open-icon-speed-dial";
 import {useTheme} from "@mui/material";
-import {isUserLoggedIn, token} from "../utils/auth";
+import {isUserLoggedIn} from "../utils/auth";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {SCREEN_NAMES, selectHeader} from "../features/header/header-slice";
 import {getCompletedTasks, syncTodosLoadTasks} from "../api/todoist-api";
+import {selectToken} from "../pages/login/login-slice";
 
 export const Root = () => {
     const location = useLocation();
@@ -19,6 +20,7 @@ export const Root = () => {
     const dispatch = useAppDispatch();
 
     const {currentScreenName} = useAppSelector(selectHeader);
+    const token = useAppSelector(selectToken)
 
     useEffect(() => {
         if (token) {

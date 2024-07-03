@@ -25,8 +25,8 @@ import {getXAxisLabels} from "../../../utils/get-xaxis-labels";
 import {getCompletedTasksCount} from "../../../utils/get-completed-tasks-count";
 import {ActivitySorting} from "../../../pages/activity/activity-sorting/activity-sorting";
 import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../../api/todoist-api";
-import {token} from "../../../utils/auth";
 import {selectScreenSizes} from "../../screen-slice";
+import {selectToken} from "../../../pages/login/login-slice";
 
 const PERIODS = [
     {
@@ -55,6 +55,7 @@ export const HeaderModalProductivity = () => {
     const {goalForDay} = useAppSelector(selectHeader);
     const {tasks} = useAppSelector(selectTasks);
     const screenSizes = useAppSelector(selectScreenSizes);
+    const token = useAppSelector(selectToken)
 
     const [openEditGoal, setOpenEditGoal] = React.useState(false);
     const [selectedText, setSelectedText] = React.useState(PERIODS[0].text);

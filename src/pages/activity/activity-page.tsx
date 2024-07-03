@@ -13,7 +13,7 @@ import SortIcon from '@mui/icons-material/Sort';
 import {PRIORITY} from "../../components/task/task-cards-list/task-card-edit/task-card-edit";
 import {ActivitySorting} from "./activity-sorting/activity-sorting";
 import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../api/todoist-api";
-import {token} from "../../utils/auth";
+import {selectToken} from "../login/login-slice";
 
 const STATUS_TASK = [
     {
@@ -46,6 +46,7 @@ export const ActivityPage = () => {
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const activeTasks = useAppSelector(selectActiveTasks);
     const completedTasks = useAppSelector(selectCompletedTasks);
+    const token = useAppSelector(selectToken)
     const tasksAPI = [...activeTasksAPI, ...completedTasksAPI];
 
     const [valueSelectStatusTask, setValueSelectStatusTask] = React.useState(STATUS_TASK[0].text);

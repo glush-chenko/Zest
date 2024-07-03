@@ -13,10 +13,10 @@ import dayjs, {Dayjs} from "dayjs";
 import {useTheme} from "@mui/material";
 import {createTask} from "../../../api/todoist-api";
 import utc from 'dayjs/plugin/utc';
-import {token} from "../../../utils/auth";
 import {selectScreenSizes} from "../../../features/screen-slice";
 import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
+import {selectToken} from "../../../pages/login/login-slice";
 
 export const TaskModal = () => {
     const dispatch = useAppDispatch();
@@ -25,6 +25,7 @@ export const TaskModal = () => {
 
     const {tasks, newTaskId} = useAppSelector(selectTasks);
     const screenSizes = useAppSelector(selectScreenSizes);
+    const token = useAppSelector(selectToken)
 
     const [currentStep, setCurrentStep] = React.useState(0);
     const [steps, setSteps] = React.useState(

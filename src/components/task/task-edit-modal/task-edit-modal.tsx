@@ -16,8 +16,8 @@ import {
     selectTodoistTasks
 } from "../../../api/todoist-api";
 import {Loading} from "../../generic/loading";
-import {token} from "../../../utils/auth";
 import {SCREEN_NAMES, selectHeader, setActiveScreen} from "../../../features/header/header-slice";
+import {selectToken} from "../../../pages/login/login-slice";
 
 export const TaskEditModal = () => {
     const dispatch = useAppDispatch();
@@ -30,6 +30,7 @@ export const TaskEditModal = () => {
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const loading = useAppSelector(selectTodoistLoading);
     const {currentScreenName} = useAppSelector(selectHeader);
+    const token = useAppSelector(selectToken);
 
     const [selectedCompletedTask, setSelectedCompletedTask] = React.useState<Task | null>(null);
 

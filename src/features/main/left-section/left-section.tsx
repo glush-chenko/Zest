@@ -13,8 +13,8 @@ import Toolbar from "@mui/material/Toolbar";
 import {selectActiveTasks, selectCompletedTasks} from "../../../components/task/task-slice";
 import {TasksSection} from "./tasks-section/tasks-section";
 import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../../api/todoist-api";
-import {token} from "../../../utils/auth";
 import {selectScreenSizes} from "../../screen-slice";
+import {selectToken} from "../../../pages/login/login-slice";
 
 interface LeftSectionProps {
     isLoggedIn: boolean
@@ -30,6 +30,7 @@ export const LeftSection: React.FC<LeftSectionProps> = ({isLoggedIn}) => {
     const activeTasksAPI = useAppSelector(selectTodoistTasks);
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const screenSizes = useAppSelector(selectScreenSizes);
+    const token = useAppSelector(selectToken)
 
     useEffect(() => {
         if (screenSizes.isMedium) {

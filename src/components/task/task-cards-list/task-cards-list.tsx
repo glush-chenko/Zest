@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from "react";
+import React, {useMemo} from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
@@ -11,33 +11,20 @@ import {useTheme} from "@mui/material";
 import {TaskCardEdit} from "./task-card-edit/task-card-edit";
 import {sortTasksByPriority} from "../../../utils/sortTasksByPriority";
 import {
-    getCompletedTasks,
     selectTodoistLoading,
-    selectTodoistTasks, syncTodosLoadTasks,
+    selectTodoistTasks,
 } from "../../../api/todoist-api";
-import {token} from "../../../utils/auth";
-import {SCREEN_NAMES, selectHeader} from "../../../features/header/header-slice";
 import {Loading} from "../../generic/loading";
+import {selectToken} from "../../../pages/login/login-slice";
 
 export const TaskCardsList = () => {
-    const dispatch = useAppDispatch();
     const theme = useTheme();
 
     const {tasks, editingTaskId} = useAppSelector(selectTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
     const tasksAPI = useAppSelector(selectTodoistTasks);
-    const {currentScreenName} = useAppSelector(selectHeader);
+    const token = useAppSelector(selectToken)
     const loading = useAppSelector(selectTodoistLoading);
-
-    useEffect(() => {
-        if (token) {
-            switch (currentScreenName) {
-                case SCREEN_NAMES.HOME:
-                    dispatch(syncTodosLoadTasks());
-                    break;
-            }
-        }
-    }, [dispatch, currentScreenName, token]);
 
     const hasTaskOnSelectedDate = useMemo(() => {
         if (token) {

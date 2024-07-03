@@ -7,6 +7,7 @@ import taskReducer from "../components/task/task-slice";
 import headerReducer from "../features/header/header-slice";
 import todoistReducer from "../api/todoist-api";
 import screenReducer from "../features/screen-slice"
+import tokenReducer from "../pages/login/login-slice";
 
 const rootReducer = combineReducers({
     counter: counterReducer,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
     headerSlice: headerReducer,
     todoistSlice: todoistReducer,
     screenSlice: screenReducer,
+    tokenSlice: tokenReducer
 });
 
 export default rootReducer;

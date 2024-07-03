@@ -9,11 +9,12 @@ import dayjs from "dayjs";
 import errorRocket from "../../assets/error-rocket-destroyed.svg";
 import {useTheme} from "@mui/material";
 import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../api/todoist-api";
-import {token} from "../../utils/auth";
+import {selectToken} from "../login/login-slice";
 
 export const SearchPage = () => {
     const {tasks} = useAppSelector(selectTasks);
     const activeTasksAPI = useAppSelector(selectTodoistTasks);
+    const token = useAppSelector(selectToken)
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const tasksAPI = [...activeTasksAPI, ...completedTasksAPI];
 

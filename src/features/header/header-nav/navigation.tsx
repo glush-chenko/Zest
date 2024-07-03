@@ -25,8 +25,8 @@ import {HeaderSearch} from "../header-search/header-search";
 import Skeleton from '@mui/material/Skeleton';
 import {selectTodoistCompletedTasks} from "../../../api/todoist-api";
 import dayjs from "dayjs";
-import {token} from "../../../utils/auth";
 import MenuIcon from '@mui/icons-material/Menu';
+import {selectToken} from "../../../pages/login/login-slice";
 
 enum SETTINGS {
     PROFILE = 'Profile',
@@ -51,6 +51,7 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
     const {avatarSrc, goalForDay} = useAppSelector(selectHeader);
+    const token = useAppSelector(selectToken)
 
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const [anchorElPage, setAnchorElPage] = React.useState<null | HTMLElement>(null);

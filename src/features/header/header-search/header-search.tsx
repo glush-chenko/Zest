@@ -3,15 +3,14 @@ import {alpha, styled} from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import {useNavigate, createSearchParams, Form} from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import {Autocomplete, FilterOptionsState, Slide, useTheme} from "@mui/material";
+import {Autocomplete, FilterOptionsState, useTheme} from "@mui/material";
 import {selectTasks, Task} from "../../../components/task/task-slice";
 import {useAppSelector} from "../../../app/hooks";
 import TextField from "@mui/material/TextField";
 import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../../api/todoist-api";
-import {token} from "../../../utils/auth";
 import {selectScreenSizes} from "../../screen-slice";
 import Fade from '@mui/material/Fade';
-import Collapse from "@mui/material/Collapse";
+import {selectToken} from "../../../pages/login/login-slice";
 
 const Search = styled('div')(({theme}) => ({
     display: 'flex',
@@ -71,12 +70,12 @@ export const HeaderSearch = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const autocompleteRef = useRef<HTMLDivElement | null>(null);
-    const searchRef = useRef(null);
 
     const {tasks} = useAppSelector(selectTasks);
     const activeTasksAPI = useAppSelector(selectTodoistTasks);
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const screenSizes = useAppSelector(selectScreenSizes);
+    const token = useAppSelector(selectToken)
     const tasksAPI = [...activeTasksAPI, ...completedTasksAPI];
 
     const [currentSearchQuery, setCurrentSearchQuery] = React.useState('');
