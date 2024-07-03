@@ -36,8 +36,6 @@ export const TaskEditModal = () => {
 
     const {id} = useParams<{ id: string }>();
 
-    // console.log(selectedActivityTask)
-
     const isCompleted = useMemo(() => {
         return completedTasksAPI.some(task => task.id === id);
     }, [completedTasksAPI])
