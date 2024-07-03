@@ -1,6 +1,5 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from "../../app/store";
-import dayjs, {Dayjs} from 'dayjs';
 import {v4 as uuidv4} from 'uuid';
 
 export interface Task {
@@ -8,9 +7,9 @@ export interface Task {
     name: string;
     description: string;
     completed: boolean;
-    scheduledDate: number;
+    scheduledDate?: number | null;
     priority: string;
-    createdAt: number;
+    createdAt: number | null;
     completedAt?: number | null;
 }
 
@@ -124,7 +123,17 @@ export const {
     updateTask,
 } = taskSlice.actions;
 export const selectTasks = (state: RootState) => state.taskSlice;
-export const selectActiveTasks = (state: RootState) => state.taskSlice.tasks.filter((task) => !task.completed);
-export const selectCompletedTasks = (state: RootState) => state.taskSlice.tasks.filter((task) => task.completed);
+export const selectActiveTasks = createSelector(
+    [(state: RootState) => state.taskSlice.tasks],
+    (tasks) => {
+        return tasks.filter((task) => !task.completed);
+    }
+)
 
+export const selectCompletedTasks = createSelector(
+    [(state: RootState) => state.taskSlice.tasks],
+    (tasks) => {
+        return tasks.filter((task) => task.completed);
+    }
+)
 export default taskSlice.reducer;

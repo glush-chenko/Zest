@@ -40,7 +40,27 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
 
     return (
         <List sx={{padding: 0}}>
-            <ListItem disablePadding sx={{display: 'block'}} onClick={() => handleTaskClick(task.id)}>
+            <ListItem
+                disablePadding
+                sx={{
+                    display: 'block',
+                    "& .edit-icon": {
+                        display: "none",
+                    },
+                    "& .completed-icon": {
+                        display: "flex",
+                    },
+                    "&:hover": {
+                        "& .edit-icon": {
+                            display: "flex",
+                        },
+                        "& .completed-icon": {
+                            display: "none",
+                        },
+                    },
+                }}
+                onClick={() => handleTaskClick(task.id)}
+            >
                 <ListItemButton
                     sx={{
                         minHeight: 30,
@@ -57,31 +77,28 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
                             justifyContent: 'center',
                         }}
                     >
-                        <Box
-                            sx={{display: "flex"}}
-                            onMouseOver={() => setIsHovered(true)}
-                            onMouseOut={() => setIsHovered(false)}
-                        >
-                            {isHovered ?
-                                <EditIcon sx={{fontSize: "1.3rem"}} />
-                                :
-                                <Icon
-                                    sx={{
-                                        color: done ? theme.palette.success.light : theme.palette.primary.light
-                                    }}
-                                />
-                            }
+                        <Box sx={{display: "flex"}}>
+                            <EditIcon sx={{fontSize: "1.5rem"}} className="edit-icon"/>
+                            <Icon
+                                className="completed-icon"
+                                sx={{
+                                    color: done ? theme.palette.success.light : theme.palette.primary.light,
+                                    fontSize: "1.5rem"
+                                }}
+                            />
                         </Box>
                     </ListItemIcon>
                     <ListItemText
                         primary={task.name}
                         sx={{
                             opacity: drawer ? 1 : 0,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
                             width: drawer ? "auto" : 0,
-                            flexGrow: 0
+                            flexGrow: 0,
+                            "& .MuiTypography-root": {
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }
                         }}
                     />
                 </ListItemButton>

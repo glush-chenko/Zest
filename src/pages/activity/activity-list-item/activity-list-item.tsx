@@ -60,38 +60,50 @@ export const ActivityListItem = (props: ActivityCardProps) => {
                 padding: task.id === id && shouldResetStyles ? '0.5rem' : '0',
                 borderRadius: task.id === id && shouldResetStyles ? '4px' : '0',
                 transition: 'background-color 0.3s, padding 0.3s',
+                [theme.breakpoints.down('sm')]: {
+                    gap: 0
+                }
             }}
         >
 
-            {completed ?
+            {completed ? (
                 <AssignmentTurnedInIcon
                     sx={{
                         color: prioritySort ? `${getPriorityLabel}` : theme.palette.success.main,
-                        fontSize: "2rem"
+                        fontSize: "2rem",
+                        [theme.breakpoints.down('sm')]: {
+                            fontSize: "1.7rem"
+                        }
                     }}
                 />
-                :
+                ) : (
                 <AssignmentIcon
                     sx={{
                         color: prioritySort ? `${getPriorityLabel}` : theme.palette.warning.light,
-                        fontSize: "2rem"
+                        fontSize: "2rem",
+                        [theme.breakpoints.down('sm')]: {
+                            fontSize: "1.7rem"
+                        }
                     }}
                 />
-            }
+            )}
 
 
             <Box
                 sx={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem"
+                    // flexDirection: "column",
+                    gap: "0.5rem",
+                    overflow: "hidden"
                 }}
             >
-                <Box sx={{display: "flex", gap: "0.3rem"}}>
+                <Box sx={{display: "flex", gap: "0.3rem", overflow: "hidden"}}>
                     <Typography
                         variant="body2"
                         sx={{
-                            color: theme.palette.mode === "dark" ? theme.palette.grey[500] : theme.palette.grey[600]
+                            color: theme.palette.mode === "dark" ? theme.palette.grey[500] : theme.palette.grey[600],
+                            display: "flex",
+                            alignItems: "center",
                         }}
                     >
                         {`${dayjs(task.completed ? task.completedAt! : task.createdAt).format(
@@ -99,11 +111,18 @@ export const ActivityListItem = (props: ActivityCardProps) => {
                         )}`}
                     </Typography>
 
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{
+                        [theme.breakpoints.down('md')]: {
+                            fontSize: "0.85rem"
+                        },
+                        display: "flex",
+                        alignItems: "center",
+                        textWrap: "nowrap"
+                    }}>
                         {completed ?
-                            `You have completed the task:`
+                            `Completed the task:`
                             :
-                            `You have added a task:`
+                            `Added a task:`
                         }
                     </Typography>
 
@@ -113,6 +132,9 @@ export const ActivityListItem = (props: ActivityCardProps) => {
                             fontSize: "0.9rem",
                             color: theme.palette.mode === "light" ? `${theme.palette.grey[600]}` : `${theme.palette.grey[500]}`,
                             textDecoration: underline ? "underline" : 'none',
+                            textWrap: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                         }}
                         onMouseOver={() => setUnderline(true)}
                         onMouseOut={() => setUnderline(false)}

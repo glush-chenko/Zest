@@ -1,10 +1,6 @@
 import React, {useCallback, useMemo} from "react";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {
-    selectTasks,
-    selectTask,
-    addTask,
-} from "../task-slice";
+import {addTask, selectTask, selectTasks,} from "../task-slice";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -15,36 +11,45 @@ import {useNavigate} from "react-router-dom";
 import {TaskStepper} from "../task-stepper/task-stepper";
 import dayjs, {Dayjs} from "dayjs";
 import {useTheme} from "@mui/material";
+import {createTask} from "../../../api/todoist-api";
+import utc from 'dayjs/plugin/utc';
+import {token} from "../../../utils/auth";
+import {selectScreenSizes} from "../../../features/screen-slice";
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
 
 export const TaskModal = () => {
     const dispatch = useAppDispatch();
     const theme = useTheme();
     const navigate = useNavigate();
+
     const {tasks, newTaskId} = useAppSelector(selectTasks);
+    const screenSizes = useAppSelector(selectScreenSizes);
+
     const [currentStep, setCurrentStep] = React.useState(0);
     const [steps, setSteps] = React.useState(
         [
-        {
-            index: 0,
-            name: 'Describe the name of the task',
-            completed: false
-        },
-        {
-            index: 1,
-            name: 'Description, if required',
-            completed: false
-        },
-        {
-            index: 2,
-            name: 'Period of execution',
-            completed: false
-        }
-    ]);
+            {
+                index: 0,
+                name: 'Describe the name of the task',
+                completed: false
+            },
+            {
+                index: 1,
+                name: 'Description, if required',
+                completed: false
+            },
+            {
+                index: 2,
+                name: 'Period of execution',
+                completed: false
+            }
+        ]);
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
     const [date, setDate] = React.useState<Dayjs | null>(dayjs());
     const [nameError, setNameError] = React.useState<boolean>(false);
-    const [selectedPriority, setSelectedPriority] = React.useState("Priority 4");
+    const [selectedPriority, setSelectedPriority] = React.useState("1");
 
 
     const handleNameChange = useCallback((name: string) => {
@@ -95,17 +100,27 @@ export const TaskModal = () => {
         setCurrentStep((prevValue) => prevValue + 1);
     }, []);
 
-    const handleAddTask = useCallback(() => {
-        dispatch(addTask({
-            name,
-            description,
-            date: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
-            priority: selectedPriority,
-        }));
+    dayjs.extend(utc);
 
-        
+    const handleAddTask = useCallback(() => {
+        if (token) {
+            dispatch(createTask({
+                content: name,
+                description,
+                due_datetime: date?.toISOString(),
+                due_lang: 'en',
+                priority: selectedPriority,
+            }));
+        } else {
+            dispatch(addTask({
+                name,
+                description,
+                date: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
+                priority: selectedPriority,
+            }));
+        }
         navigate('/tasks');
-    }, [dispatch, name, description, date, newTaskId, selectedPriority]);
+    }, [dispatch, name, description, date, newTaskId, selectedPriority, token]);
 
     const disableNextButton = useMemo(() => {
         return currentStep === 0 && name.trim() === '';
@@ -115,25 +130,48 @@ export const TaskModal = () => {
         <Dialog
             open
             onClose={handleClose}
-            fullWidth={true}
-            maxWidth='md'
+            fullWidth
+            maxWidth={screenSizes.isSmall ? "sm" : 'md'}
         >
             <DialogTitle
                 sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     backgroundColor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText
-            }}
+                    color: theme.palette.primary.contrastText,
+                    [theme.breakpoints.down('sm')]: {
+                        fontSize: "large",
+                        maxHeight: "3rem",
+                        padding: "0.5rem 1rem"
+                    },
+                }}
             >
                 Create Task
+                <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                >
+                    <CloseIcon sx={{fontSize: "1.3rem", color: `${theme.palette.primary.contrastText}`}}/>
+                </IconButton>
             </DialogTitle>
 
             <DialogContent
                 sx={{
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: screenSizes.isSmall ? "column" : "row",
+                    justifyContent: "center",
                     gap: "5rem",
                     padding: "0 3rem",
-            }}
+                    overflowY: "visible",
+                    [theme.breakpoints.down('md')]: {
+                        gap: "2rem"
+                    },
+                    [theme.breakpoints.down('sm')]: {
+                        gap: "0.5rem",
+                        padding: "0 1rem"
+                    },
+                }}
             >
                 <TaskStepper steps={steps} currentStep={currentStep}/>
                 <TaskNameTextField

@@ -6,7 +6,14 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, {Dayjs} from "dayjs";
-import {completeTask, selectTask, setEditingTaskId, Task, uncompleteTask, updateTask} from "../../task-slice";
+import {
+    completeTask, removeTask,
+    selectTask,
+    setEditingTaskId,
+    Task,
+    uncompleteTask,
+    updateTask
+} from "../../task-slice";
 import FlagIcon from '@mui/icons-material/Flag';
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
@@ -22,22 +29,34 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {Pallete} from "../../../../theme/theme";
+import {
+    closeTask,
+    deleteTaskSync,
+    reopenTaskSync, syncTodosLoadTasks,
+    updateTaskContent
+} from "../../../../api/todoist-api";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import {token} from "../../../../utils/auth";
 
 export const PRIORITY = [
     {
-        value: 'Priority 1',
+        value: '4',
+        text: "priority 1",
         label: Pallete.light.palette.error.main,
     },
     {
-        value: 'Priority 2',
+        value: '3',
+        text: "priority 2",
         label: Pallete.light.palette.warning.light,
     },
     {
-        value: 'Priority 3',
+        value: '2',
+        text: "priority 3",
         label: Pallete.light.palette.info.main,
     },
     {
-        value: 'Priority 4',
+        value: '1',
+        text: "priority 4",
         label: Pallete.light.palette.grey[500],
     },
 ];
@@ -47,21 +66,25 @@ interface TaskCardEditProps {
 }
 
 export const TaskCardEdit = (props: TaskCardEditProps) => {
+    const {selectedTask} = props;
+
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {selectedTask} = props;
-    const [name, setName] = React.useState(selectedTask ? selectedTask.name : "");
-    const [description, setDescription] = React.useState(selectedTask ? selectedTask.description : "");
-    const [date, setDate] = React.useState<Dayjs | null>(
-        selectedTask ? dayjs(selectedTask.scheduledDate) : dayjs()
-    );
+    const theme = useTheme();
+
+    const [name, setName] = React.useState("");
+    const [description, setDescription] = React.useState("");
+    const [date, setDate] = React.useState<Dayjs | null>(dayjs());
     const [nameError, setNameError] = React.useState<boolean>(false);
-    const [selectedPriority, setSelectedPriority] = React.useState("Priority 4");
+    const [selectedPriority, setSelectedPriority] = React.useState("1");
     const [isHovered, setIsHovered] = React.useState(false);
 
     useEffect(() => {
         if (selectedTask) {
             setSelectedPriority(selectedTask.priority);
+            setName(selectedTask.name);
+            setDescription(selectedTask.description);
+            setDate(selectedTask.scheduledDate ? dayjs(selectedTask.scheduledDate) : dayjs());
         }
     }, [selectedTask]);
 
@@ -78,37 +101,71 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
         setDescription(description);
     }, []);
 
+
     const handleSaveTask = useCallback(() => {
         if (selectedTask) {
-            dispatch(updateTask({
-                id: selectedTask.id,
-                name: name,
-                description: description,
-                scheduledDate: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
-                priority: selectedPriority,
-            }))
+            if (token) {
+                dispatch(updateTaskContent({
+                    taskId: selectedTask.id,
+                    content: {
+                        content: name,
+                        description,
+                        due_date: date?.format('YYYY-MM-DD'),
+                        priority: selectedPriority,
+                    }
+                }))
+                dispatch(syncTodosLoadTasks());
+            } else {
+                dispatch(updateTask({
+                    id: selectedTask.id,
+                    name: name,
+                    description: description,
+                    scheduledDate: date ? date.startOf('day').valueOf() : dayjs().startOf('day').valueOf(),
+                    priority: selectedPriority,
+                }))
+            }
             dispatch(setEditingTaskId(null));
             navigate("/tasks")
         } else {
             console.error("Can't save the task because selectedTask is undefined")
         }
         dispatch(selectTask(""));
-    }, [dispatch, selectedTask, name, date, description, navigate, selectedPriority]);
-
+    }, [dispatch, selectedTask, name, date, description, navigate, selectedPriority, token]);
 
 
     const handleCompleteTask = useCallback((task: Task | null) => {
         if (task) {
             if (task.completed) {
-                dispatch(uncompleteTask(task.id));
-                dispatch(selectTask(task.id));
+                if (token) {
+                    dispatch(reopenTaskSync(task.id))
+                    navigate("/");
+                } else {
+                    dispatch(uncompleteTask(task.id));
+                    dispatch(selectTask(task.id));
+                }
             } else {
-                dispatch(completeTask(task.id));
-                dispatch(selectTask(task.id));
-                // handleCloseTask();
+                if (token) {
+                    dispatch(closeTask(task.id))
+                    navigate("/");
+                } else {
+                    dispatch(completeTask(task.id));
+                    dispatch(selectTask(task.id));
+                }
             }
         }
-    }, [dispatch]);
+    }, [dispatch, token]);
+
+    const handleDeleteTask = useCallback((task: Task | null) => {
+        if (task) {
+            if (token) {
+                dispatch(deleteTaskSync(task.id));
+                navigate("/");
+            } else {
+                dispatch(removeTask(task.id));
+                navigate("/");
+            }
+        }
+    }, [dispatch, token])
 
     return (
         <Card
@@ -126,7 +183,6 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                     flexDirection: "column",
                     justifyContent: "flex-start",
                     gap: "3rem",
-                    height: "90%",
                 }}
             >
                 <Box sx={{display: "flex", gap: "1rem"}}>
@@ -154,8 +210,10 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                                         onMouseEnter={() => setIsHovered(true)}
                                         onMouseLeave={() => setIsHovered(false)}
                                     >
-                                        {isHovered ? <CheckCircleOutlineIcon sx={{fontSize: "1.7rem"}}/> :
-                                            <RadioButtonUncheckedIcon sx={{fontSize: "1.7rem"}}/>}
+                                        {isHovered ?
+                                            <CheckCircleOutlineIcon sx={{fontSize: "1.7rem"}}/> :
+                                            <RadioButtonUncheckedIcon sx={{fontSize: "1.7rem"}}/>
+                                        }
                                     </Box>
                                 )}
                             </IconButton>
@@ -170,6 +228,26 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                         onTextFieldChange={handleTextFieldChange}
                         onDescriptionFieldChange={handleDescriptionFieldChange}
                     />
+                    <Box sx={{display: "flex", alignItems: "center"}}>
+                        <Tooltip title="Delete task" placement="top" arrow>
+                            <IconButton
+                                aria-label="delete"
+                                sx={{
+                                    '&:hover': {
+                                        backgroundColor: "transparent"
+                                    },
+                                    padding: 0,
+                                }}
+                                onClick={() => handleDeleteTask(selectedTask)}
+                            >
+                                <DeleteOutlineIcon
+                                    sx={{
+                                        fontSize: "1.5rem",
+                                        color: theme.palette.error.main
+                                    }}/>
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
                 </Box>
 
                 <Box
@@ -185,7 +263,8 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                                 textField: {
                                     size: "small",
                                     style: {
-                                        width: "9rem"
+                                        maxWidth: "9rem",
+                                        width: "100%"
                                     },
                                 }
                             }}
@@ -209,6 +288,7 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                     >
 
                         <TextField
+                            defaultValue="priority 1"
                             value={selectedPriority}
                             size="small"
                             select
@@ -242,7 +322,7 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                                     >
                                         <FlagIcon sx={{fontSize: "1.3rem", color: `${option.label}`}}/>
                                         <Typography variant="subtitle1">
-                                            {option.value}
+                                            {option.text}
                                         </Typography>
                                     </Box>
                                 </MenuItem>

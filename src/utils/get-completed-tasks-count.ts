@@ -1,6 +1,7 @@
 import dayjs, {Dayjs, ManipulateType} from 'dayjs';
+import {Task} from "../components/task/task-slice";
 
-export const getCompletedTasksCount = (tasks: any[], period: ManipulateType, current: boolean, total: boolean): number => {
+export const getCompletedTasksCount = (tasks: Task[], period: ManipulateType, current: boolean, total: boolean): number => {
     const today = dayjs();
     let startDate: Dayjs, endDate: Dayjs;
 

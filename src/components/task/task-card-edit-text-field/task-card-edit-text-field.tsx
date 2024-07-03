@@ -57,7 +57,6 @@ export const TaskCardEditTextField = (props: TaskCardEditTextFieldProps) => {
                 fullWidth
                 sx={{
                     border: 'none',
-                    // borderBottom: `1px solid lightgray`,
                     '& .MuiInput-underline:before': {
                         borderBottomColor: 'transparent',
                     },

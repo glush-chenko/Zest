@@ -54,13 +54,19 @@ export const HeaderModalProfile = () => {
                 sx={{
                     display: "flex",
                     justifyContent: "space-between",
+                    alignItems: "center",
                     backgroundColor: theme.palette.primary.main,
                     width: "100%",
-                    height: "4rem",
+                    maxHeight: "4rem",
                     color: theme.palette.primary.contrastText,
+                    [theme.breakpoints.down('sm')]: {
+                        fontSize: "large",
+                        maxHeight: "3rem",
+                        padding: "0.5rem 1rem"
+                    }
                 }}
             >
-                <Typography variant="h6">Select an avatar for your profile</Typography>
+                Select an avatar for your profile
                 <IconButton
                     aria-label="close"
                     onClick={handleClose}
@@ -89,6 +95,9 @@ export const HeaderModalProfile = () => {
                             sx={{
                                 flex: "0 0 22%",
                                 height: "auto",
+                                [theme.breakpoints.down('sm')]: {
+                                    flex: "0 0 27%",
+                                }
                             }}
                         >
                             <Box

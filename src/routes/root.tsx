@@ -1,29 +1,45 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {Navigation} from "../features/header/header-nav/navigation";
 import {Outlet, useLocation} from "react-router-dom";
-import {Content} from "../features/main/content/content";
 import {RightSection} from "../features/main/right-section/right-section";
-import {TaskModal} from "../components/task/task-modal/task-modal";
-import {HomePage} from "../pages/home/home-page";
 import {LeftSection} from "../features/main/left-section/left-section";
 import Box from "@mui/material/Box";
 import AboutPage from "../pages/about/about-page";
 import {OpenIconSpeedDial} from "../components/generic/open-icon-speed-dial";
 import {useTheme} from "@mui/material";
+import {isUserLoggedIn, token} from "../utils/auth";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {SCREEN_NAMES, selectHeader} from "../features/header/header-slice";
+import {getCompletedTasks, syncTodosLoadTasks} from "../api/todoist-api";
 
 export const Root = () => {
     const location = useLocation();
+    const isLoggedIn = isUserLoggedIn();
     const theme = useTheme();
+    const dispatch = useAppDispatch();
+
+    const {currentScreenName} = useAppSelector(selectHeader);
+
+    useEffect(() => {
+        if (token) {
+            switch (currentScreenName) {
+                case SCREEN_NAMES.HOME:
+                    dispatch(getCompletedTasks());
+                    dispatch(syncTodosLoadTasks());
+                    break;
+            }
+        }
+    }, [dispatch, currentScreenName, token]);
 
     return (
         (location && location.pathname === "/about") ? (
             <>
-                <Navigation />
-                <AboutPage />
+                <Navigation isLoggedIn={isLoggedIn}/>
+                <AboutPage/>
             </>
         ) : (
             <>
-                <Navigation />
+                <Navigation isLoggedIn={isLoggedIn}/>
                 <Box sx={{
                     display: "flex",
                     overflow: "hidden",
@@ -38,7 +54,7 @@ export const Root = () => {
                         borderRadius: '4px',
                     },
                 }}>
-                    <LeftSection/>
+                    <LeftSection isLoggedIn={isLoggedIn}/>
                     <Outlet/>
                     <OpenIconSpeedDial/>
                     <RightSection/>

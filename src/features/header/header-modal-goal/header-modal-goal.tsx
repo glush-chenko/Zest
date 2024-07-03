@@ -32,7 +32,7 @@ export const HeaderModalGoal = (props: HeaderModalGoalProps) => {
         <Dialog
             open
             onClose={onClose}
-            fullWidth={true}
+            fullWidth
             maxWidth="xs"
         >
             <DialogTitle>{text}</DialogTitle>

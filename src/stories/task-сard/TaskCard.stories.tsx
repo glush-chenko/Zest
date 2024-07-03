@@ -34,7 +34,7 @@ export const Default: Story = {
             description: 'This is a task description.',
             completed: false,
             scheduledDate: dayjs().startOf('day').valueOf(),
-            priority: "Priority 4",
+            priority: "4",
             createdAt: Date.now(),
         },
     },

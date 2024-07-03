@@ -3,9 +3,7 @@ import {RootState} from "../../app/store";
 
 export enum SCREEN_NAMES {
     HOME = "HOME",
-    TASKS = "TASKS",
-    ACTIVITY = "ACTIVITY",
-    ABOUT = "ABOUT"
+    TASK = "TASK",
 }
 
 export interface HeaderState {

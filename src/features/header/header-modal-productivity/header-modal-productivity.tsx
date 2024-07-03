@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import {BarChart, BarChartProps} from '@mui/x-charts/BarChart';
 import {PieChart, PieChartProps} from '@mui/x-charts/PieChart';
 import {useAppSelector} from "../../../app/hooks";
-import {selectTasks} from "../../../components/task/task-slice";
+import {selectTasks, Task} from "../../../components/task/task-slice";
 import dayjs from "dayjs";
 import Typography from "@mui/material/Typography";
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
@@ -20,10 +20,13 @@ import IconButton from "@mui/material/IconButton";
 import {completedTasksForPrevious} from "../../../utils/completed-tasks-for-previous";
 import {useLocation, useNavigate} from "react-router-dom";
 import {HeaderModalSectionProductivity} from "./header-modal-section-productivity/header-modal-section-productivity";
-import {Sorting} from "../../../components/generic/sorting";
 import {groupDaysIntoMonths} from "../../../utils/group-days-into-months";
 import {getXAxisLabels} from "../../../utils/get-xaxis-labels";
 import {getCompletedTasksCount} from "../../../utils/get-completed-tasks-count";
+import {ActivitySorting} from "../../../pages/activity/activity-sorting/activity-sorting";
+import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../../api/todoist-api";
+import {token} from "../../../utils/auth";
+import {selectScreenSizes} from "../../screen-slice";
 
 const PERIODS = [
     {
@@ -44,12 +47,28 @@ export const HeaderModalProductivity = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
-    const {tasks} = useAppSelector(selectTasks);
+
+    const [tasksData, setTasksData] = React.useState<Task[]>([]);
+    const activeTasksAPI = useAppSelector(selectTodoistTasks);
+    const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
     const {goalForDay} = useAppSelector(selectHeader);
+    const {tasks} = useAppSelector(selectTasks);
+    const screenSizes = useAppSelector(selectScreenSizes);
+
     const [openEditGoal, setOpenEditGoal] = React.useState(false);
     const [selectedText, setSelectedText] = React.useState(PERIODS[0].text);
     const [selectedPeriod, setSelectedPeriod] = React.useState('week');
+
+    useEffect(() => {
+        let tasksData;
+        if (token) {
+            tasksData = [...activeTasksAPI, ...completedTasksAPI];
+        } else {
+            tasksData = tasks;
+        }
+        setTasksData(tasksData);
+    }, [activeTasksAPI, completedTasksAPI, token, tasks]);
 
     const [weekData, setWeekData] = React.useState<{ current: number[]; previous: number[] }>({
         current: [],
@@ -64,57 +83,79 @@ export const HeaderModalProductivity = () => {
         previous: [],
     });
 
-    const completedTasksForWeek = completedTasksForPrevious({tasks, period: "week", current: true})
-    const completedTasksForPreviousWeek = completedTasksForPrevious({tasks, period: "week", current: false})
+    const completedTasksForWeek = completedTasksForPrevious({tasks: tasksData, period: "week", current: true})
+    const completedTasksForPreviousWeek = completedTasksForPrevious({tasks: tasksData, period: "week", current: false})
 
-    const completedTasksForMonth = completedTasksForPrevious({tasks, period: "month", current: true});
-    const completedTasksForPreviousMonth = completedTasksForPrevious({tasks, period: "month", current: false});
+    const completedTasksForMonth = completedTasksForPrevious({tasks: tasksData, period: "month", current: true});
+    const completedTasksForPreviousMonth = completedTasksForPrevious({
+        tasks: tasksData,
+        period: "month",
+        current: false
+    });
 
-    const completedTasksForYear = completedTasksForPrevious({tasks, period: "year", current: true});
-    const completedTasksForPreviousYear = completedTasksForPrevious({tasks, period: "year", current: false});
+    const completedTasksForYear = completedTasksForPrevious({tasks: tasksData, period: "year", current: true});
+    const completedTasksForPreviousYear = completedTasksForPrevious({tasks: tasksData, period: "year", current: false});
 
     const completedTasksForYearIntoMonth = groupDaysIntoMonths(completedTasksForYear);
     const completedTasksForPreviousYearIntoMonth = groupDaysIntoMonths(completedTasksForPreviousYear);
 
     const xAxisLabels = getXAxisLabels(selectedPeriod, dayjs());
 
-    const weeklyCompletedTasks = getCompletedTasksCount(tasks, 'week', true, false);
-    const monthlyCompletedTasks = getCompletedTasksCount(tasks, 'month', true, false);
-    const yearlyCompletedTasks = getCompletedTasksCount(tasks, 'year', true, false);
+    const weeklyCompletedTasks = getCompletedTasksCount(tasksData, 'week', true, false);
+    const monthlyCompletedTasks = getCompletedTasksCount(tasksData, 'month', true, false);
+    const yearlyCompletedTasks = getCompletedTasksCount(tasksData, 'year', true, false);
 
-    const totalWeeklyCompletedTasks = getCompletedTasksCount(tasks, 'week', true, true);
-    const totalMonthlyCompletedTasks = getCompletedTasksCount(tasks, 'month', true, true);
-    const totalYearlyCompletedTasks = getCompletedTasksCount(tasks, 'year', true, true);
+    const totalWeeklyCompletedTasks = getCompletedTasksCount(tasksData, 'week', true, true);
+    const totalMonthlyCompletedTasks = getCompletedTasksCount(tasksData, 'month', true, true);
+    const totalYearlyCompletedTasks = getCompletedTasksCount(tasksData, 'year', true, true);
 
-    const weeklyCompletedTasksPrevious = getCompletedTasksCount(tasks, 'week', false, false);
-    const monthlyCompletedTasksPrevious = getCompletedTasksCount(tasks, 'month', false, false);
-    const yearlyCompletedTasksPrevious = getCompletedTasksCount(tasks, 'year', false, false);
+    const weeklyCompletedTasksPrevious = getCompletedTasksCount(tasksData, 'week', false, false);
+    const monthlyCompletedTasksPrevious = getCompletedTasksCount(tasksData, 'month', false, false);
+    const yearlyCompletedTasksPrevious = getCompletedTasksCount(tasksData, 'year', false, false);
 
-    const totalWeeklyCompletedTasksPrevious = getCompletedTasksCount(tasks, 'week', false, true);
-    const totalMonthlyCompletedTasksPrevious = getCompletedTasksCount(tasks, 'month', false, true);
-    const totalYearlyCompletedTasksPrevious = getCompletedTasksCount(tasks, 'year', false, true);
+    const totalWeeklyCompletedTasksPrevious = getCompletedTasksCount(tasksData, 'week', false, true);
+    const totalMonthlyCompletedTasksPrevious = getCompletedTasksCount(tasksData, 'month', false, true);
+    const totalYearlyCompletedTasksPrevious = getCompletedTasksCount(tasksData, 'year', false, true);
 
-    let maxCompletedTasks = 0;
-    let totalMaxCompletedTasks = 0;
-    let maxPeriod: 'week' | 'month' | 'year' = 'week';
+    let maxCompletedTasks = useMemo(() => {
+        switch (selectedPeriod) {
+            case 'week':
+                return Math.max(weeklyCompletedTasks, weeklyCompletedTasksPrevious);
+            case 'month':
+                return Math.max(monthlyCompletedTasks, monthlyCompletedTasksPrevious);
+            case 'year':
+                return Math.max(yearlyCompletedTasks, yearlyCompletedTasksPrevious);
+        }
+        return 0;
+    }, [
+        selectedPeriod,
+        weeklyCompletedTasks,
+        weeklyCompletedTasks,
+        monthlyCompletedTasks,
+        monthlyCompletedTasksPrevious,
+        yearlyCompletedTasks,
+        yearlyCompletedTasksPrevious
+    ]);
 
-    switch (selectedPeriod) {
-        case 'week':
-            maxCompletedTasks = Math.max(weeklyCompletedTasks, weeklyCompletedTasksPrevious);
-            totalMaxCompletedTasks = Math.max(totalWeeklyCompletedTasks, totalWeeklyCompletedTasksPrevious);
-            maxPeriod = 'week';
-            break;
-        case 'month':
-            maxCompletedTasks = Math.max(monthlyCompletedTasks, monthlyCompletedTasksPrevious);
-            totalMaxCompletedTasks = Math.max(totalMonthlyCompletedTasks, totalMonthlyCompletedTasksPrevious);
-            maxPeriod = 'month';
-            break;
-        case 'year':
-            maxCompletedTasks = Math.max(yearlyCompletedTasks, yearlyCompletedTasksPrevious);
-            totalMaxCompletedTasks = Math.max(totalYearlyCompletedTasks, totalYearlyCompletedTasksPrevious);
-            maxPeriod = 'year';
-            break;
-    }
+    let totalMaxCompletedTasks = useMemo(() => {
+        switch (selectedPeriod) {
+            case 'week':
+                return Math.max(totalWeeklyCompletedTasks, totalWeeklyCompletedTasksPrevious);
+            case 'month':
+                return Math.max(totalMonthlyCompletedTasks, totalMonthlyCompletedTasksPrevious);
+            case 'year':
+                return Math.max(totalYearlyCompletedTasks, totalYearlyCompletedTasksPrevious);
+        }
+        return 0;
+    }, [
+        selectedPeriod,
+        totalWeeklyCompletedTasks,
+        totalWeeklyCompletedTasksPrevious,
+        totalMonthlyCompletedTasks,
+        totalMonthlyCompletedTasksPrevious,
+        totalYearlyCompletedTasks,
+        totalYearlyCompletedTasksPrevious
+    ]);
 
     useEffect(() => {
         if (PERIODS[0].text === selectedText) {
@@ -137,12 +178,15 @@ export const HeaderModalProductivity = () => {
             setSelectedPeriod(PERIODS[2].period);
         }
 
-    }, [selectedText, PERIODS]);
+    }, [
+        selectedText,
+        tasksData
+    ]);
 
     const getPieChartData = useMemo(() => {
-        const completedTasks = tasks.filter((t) => t.completed).length;
-        const inProgressTasks = tasks.filter((t) => !t.completed).length;
-        const overdueTasksCount = tasks.filter((t) => !t.completed && dayjs().diff(dayjs(t.scheduledDate), 'day') > 7).length;
+        const completedTasks = tasksData.filter((t) => t.completed).length;
+        const inProgressTasks = tasksData.filter((t) => !t.completed).length;
+        const overdueTasksCount = tasksData.filter((t) => !t.completed && dayjs().diff(dayjs(t.scheduledDate), 'day') > 7).length;
 
         const totalTasks = completedTasks + inProgressTasks + overdueTasksCount;
 
@@ -170,13 +214,13 @@ export const HeaderModalProductivity = () => {
                 key: `${overduePercentage}`
             },
         ]
-    }, [tasks]);
+    }, [tasksData]);
 
     const completedTasksForDay = useMemo(() => {
-        return tasks.filter((task) =>
+        return tasksData.filter((task) =>
             dayjs(task.completedAt).isSame(selectedDate, 'day') && task.completed
         ).length
-    }, [tasks, selectedDate]);
+    }, [tasksData, selectedDate]);
 
     const handleClickButtonGoal = useCallback(() => {
         setOpenEditGoal(true);
@@ -218,13 +262,13 @@ export const HeaderModalProductivity = () => {
         yAxis: [{
             label: `goal for ${selectedPeriod}`,
             scaleType: 'linear',
-            // max: goalForDay,
-            max: totalMaxCompletedTasks,
+            max: selectedText === PERIODS[2].text ?
+                maxCompletedTasks :
+                totalMaxCompletedTasks,
             min: 0,
-            // tickNumber: goalForDay,
             tickMinStep: 1,
         }],
-        height: 350,
+        height: screenSizes.isSmall ? 270 : 350,
         slotProps: {
             legend: {
                 hidden: false,
@@ -241,13 +285,12 @@ export const HeaderModalProductivity = () => {
                 outerRadius: 120,
                 cornerRadius: 14,
                 paddingAngle: 3,
-                cx: 150,
-                // startAngle: -60,
+                cx: "70%",
                 data: getPieChartData,
                 highlightScope: {highlighted: 'item', faded: 'global'},
             },
         ],
-        height: 300,
+        height: screenSizes.isSmall ? 250 : 300,
         slotProps: {
             legend: {
                 hidden: true,
@@ -260,7 +303,7 @@ export const HeaderModalProductivity = () => {
             <Dialog
                 open
                 onClose={handleClose}
-                fullWidth={true}
+                fullWidth
                 maxWidth="md"
                 PaperProps={{
                     sx: {
@@ -271,6 +314,18 @@ export const HeaderModalProductivity = () => {
                         borderRadius: "1rem",
                         paddingBottom: "1rem",
                         backgroundColor: theme.palette.mode === "light" ? theme.palette.grey[300] : theme.palette.grey[900],
+                        [theme.breakpoints.down('md')]: {
+                            maxWidth: "40rem"
+                        }
+                    },
+                }}
+                sx={{
+                    '& ::-webkit-scrollbar': {
+                        width: '0.6rem',
+                    },
+                    '& ::-webkit-scrollbar-thumb': {
+                        backgroundColor: theme.palette.grey[500],
+                        borderRadius: '4px',
                     },
                 }}
             >
@@ -278,10 +333,16 @@ export const HeaderModalProductivity = () => {
                     sx={{
                         display: "flex",
                         justifyContent: "space-between",
+                        alignItems: "center",
                         backgroundColor: theme.palette.primary.main,
                         width: "100%",
                         height: "4rem",
-                        color: theme.palette.primary.contrastText
+                        color: theme.palette.primary.contrastText,
+                        [theme.breakpoints.down('sm')]: {
+                            fontSize: "large",
+                            maxHeight: "3rem",
+                            padding: "0.5rem 1rem"
+                        }
                     }}
                 >
                     Productivity
@@ -301,20 +362,27 @@ export const HeaderModalProductivity = () => {
                     backgroundColor: theme.palette.mode === "light" ? theme.palette.common.white : theme.palette.grey[600],
                     borderRadius: "1rem",
                     padding: "1rem 2rem 1rem 2rem",
+                    [theme.breakpoints.down('sm')]: {
+                        padding: "0.5rem 1rem"
+                    }
                 }}>
                     <Typography variant="body1" sx={{fontWeight: 600}}>Goal for the day</Typography>
                     <Box sx={{border: `1px solid ${theme.palette.grey[300]}`, width: "100%"}}/>
 
                     <Typography variant="body1">
-                        {tasks.filter((t) => t.completed).length} tasks completed.
+                        {tasksData.filter((t) => t.completed).length} tasks completed.
                     </Typography>
 
                     <WorkspacePremiumIcon
                         sx={{
                             fontSize: '4rem',
                             color: theme.palette.mode === "light" ? theme.palette.grey[600] : theme.palette.common.white,
+                            [theme.breakpoints.down('sm')]: {
+                                fontSize: "3rem"
+                            }
                         }}
                     />
+
                     <Typography variant="body2">
                         The goal for the day has been achieved: {completedTasksForDay}/{goalForDay} tasks
                     </Typography>
@@ -332,13 +400,21 @@ export const HeaderModalProductivity = () => {
                 </Box>
 
                 <Stack
-                    direction={{xs: 'row', xl: 'row'}}
+                    direction={{md: 'row', sm: 'column'}}
                     spacing={1}
                     sx={{
                         display: "flex",
                         gap: "1rem",
                         width: '100%',
-                        padding: "1rem"
+                        padding: "1rem",
+                        [theme.breakpoints.down('md')]: {
+                            maxHeight: "25rem",
+                            padding: "0 4rem"
+                        },
+                        [theme.breakpoints.down('sm')]: {
+                            // maxHeight: "25rem",
+                            padding: "0.5rem"
+                        }
                     }}
                 >
                     <Box
@@ -352,19 +428,28 @@ export const HeaderModalProductivity = () => {
                             // color: theme.palette.common.black,
                             borderRadius: "2rem",
                             padding: "1rem",
-                            flex: 2
+                            flex: 2,
+                            [theme.breakpoints.down('md')]: {
+                                maxWidth: "30rem",
+                            },
                         }}
                     >
                         <Box
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "space-between"
+                                justifyContent: "space-between",
                             }}
                         >
-                            <Typography variant="body1" sx={{fontWeight: 600}}>Last activity of
-                                the {`${selectedPeriod}`}</Typography>
-                            <Sorting periods={PERIODS} selectedText={selectedText} onTextChange={setSelectedText}/>
+                            <Typography variant="body1" sx={{fontWeight: 600}}>
+                                Last activity
+                                {/*of the {`${selectedPeriod}`}*/}
+                            </Typography>
+                            <ActivitySorting
+                                periods={PERIODS}
+                                selectedText={selectedText}
+                                onTextChange={setSelectedText}
+                            />
                         </Box>
 
                         <Box sx={{border: `1px solid ${theme.palette.grey[300]}`, width: "100%"}}/>
@@ -372,11 +457,6 @@ export const HeaderModalProductivity = () => {
                             {...barChartsProps}
                             colors={[`${theme.palette.primary.light}`, `${theme.palette.violet.main}`]}
                         />
-                        <Box sx={{display: "flex", justifyContent: "center"}}>
-                            <Typography variant="body1" sx={{fontWeight: 500}}>
-                                {`Maximum completed tasks: ${maxCompletedTasks} (${maxPeriod})`}
-                            </Typography>
-                        </Box>
                     </Box>
 
                     <Box
@@ -390,7 +470,10 @@ export const HeaderModalProductivity = () => {
                             borderRadius: "2rem",
                             padding: "1rem",
                             flex: 1,
-                            minWidth: "20rem"
+                            minWidth: "20rem",
+                            [theme.breakpoints.down('md')]: {
+                                maxWidth: "30rem",
+                            },
                         }}
                     >
                         <Typography variant="body1" sx={{fontWeight: 600}}>Current task status</Typography>
