@@ -1,4 +1,4 @@
-import React, {ChangeEvent} from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Card from "@mui/material/Card";
@@ -50,7 +50,15 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                 padding: "0.5rem 0.5rem",
                 border: theme.palette.mode === "dark" ? `2px solid ${theme.palette.secondary.light}` : `2px solid ${theme.palette.grey[500]}`,
                 borderRadius: "1.5rem",
-                width: "25rem",
+                maxWidth: "25rem",
+                width: "100%",
+                minHeight: "15rem",
+                [theme.breakpoints.down('md')]: {
+                    maxWidth: "20rem"
+                },
+                [theme.breakpoints.down('sm')]: {
+                    maxWidth: "none"
+                },
             }}
             >
 
@@ -60,7 +68,7 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                         autoFocus
                         required
                         label="Name"
-                        sx={{width: "20rem"}}
+                        fullWidth
                         error={nameError}
                         value={name}
                         onChange={(e) => onNameChange(e.target.value)}
@@ -79,6 +87,7 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                             flexDirection: "column",
                             alignItems: "center",
                             gap: "1.5rem",
+                            width: "100%"
                         }}
                     >
                         <Card
@@ -86,14 +95,14 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                             sx={{
                                 border: 'none',
                                 borderBottom: `1px solid lightgray`,
-                                backgroundColor: "transparent"
+                                backgroundColor: "transparent",
+                                width: "100%"
                             }}
                         >
                             <CardContent
                                 sx={{
                                     display: "flex",
                                     justifyContent: "center",
-                                    width: 285,
                                     padding: "0.5rem",
                                     '&:last-child': {
                                         paddingBottom: 0,
@@ -108,7 +117,7 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                             label="Description"
                             multiline
                             // rows={2}
-                            sx={{minWidth: "20rem"}}
+                            sx={{maxWidth: "20rem", width: "100%"}}
                             value={description}
                             variant="standard"
                             onChange={(e) => onDescriptionChange(e.target.value)}
@@ -138,7 +147,10 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                             sx={{
                                 display: "flex",
                                 gap: "1rem",
-                                alignItems: "center"
+                                alignItems: "center",
+                                // [theme.breakpoints.down('sm')]: {
+                                //     maxWidth: "10rem"
+                                // },
                             }}
                         >
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -158,6 +170,7 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                 size="medium"
                                 select
                                 sx={{
+                                    width: "100%",
                                     flex: 1,
                                     '& .MuiSelect-icon': {
                                         display: 'none',
@@ -170,7 +183,6 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                     <MenuItem
                                         sx={{
                                             display: "flex",
-                                            // height: "2rem",
                                         }}
                                         value={option.value}
                                         key={option.value}
@@ -184,7 +196,7 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                         >
                                             <FlagIcon sx={{fontSize: "1.3rem", color: `${option.label}`}}/>
                                             <Typography variant="subtitle1">
-                                                {option.value}
+                                                {option.text}
                                             </Typography>
                                         </Box>
                                     </MenuItem>

@@ -1,24 +1,26 @@
-import React, {useEffect, useMemo} from "react";
+import React, {Fragment, useCallback, useEffect, useMemo} from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {useTheme} from "@mui/material";
 import {useAppSelector} from "../../app/hooks";
 import Divider from '@mui/material/Divider';
-import {selectTasks, Task} from "../../components/task/task-slice";
+import {selectActiveTasks, selectCompletedTasks, selectTasks, Task} from "../../components/task/task-slice";
 import {ActivityListItem} from "./activity-list-item/activity-list-item";
 import {formatDate} from "../../utils/format-date";
-import {Sorting} from "../../components/generic/sorting";
 import {useLocation} from "react-router-dom";
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SortIcon from '@mui/icons-material/Sort';
 import {PRIORITY} from "../../components/task/task-cards-list/task-card-edit/task-card-edit";
+import {ActivitySorting} from "./activity-sorting/activity-sorting";
+import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../api/todoist-api";
+import {token} from "../../utils/auth";
 
 const STATUS_TASK = [
     {
         text: 'all'
     },
     {
-        text: 'doing'
+        text: 'in progress'
     },
     {
         text: "completed"
@@ -37,92 +39,74 @@ const SORTED_TASK = [
 export const ActivityPage = () => {
     const theme = useTheme();
     const location = useLocation();
-    const {tasks} = useAppSelector(selectTasks);
     const boxRef = React.useRef<HTMLDivElement>(null);
+
+    const {tasks} = useAppSelector(selectTasks);
+    const activeTasksAPI = useAppSelector(selectTodoistTasks);
+    const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
+    const activeTasks = useAppSelector(selectActiveTasks);
+    const completedTasks = useAppSelector(selectCompletedTasks);
+    const tasksAPI = [...activeTasksAPI, ...completedTasksAPI];
+
     const [valueSelectStatusTask, setValueSelectStatusTask] = React.useState(STATUS_TASK[0].text);
     const [valueSortedTask, setValueSortedTask] = React.useState(SORTED_TASK[0].text);
     const activityTaskLocation = /^\/activity\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(location.pathname);
 
     useEffect(() => {
-        if (valueSelectStatusTask === "doing" && activityTaskLocation) {
+        if (valueSelectStatusTask === "in progress" && activityTaskLocation) {
             setValueSelectStatusTask("all");
         }
     }, [valueSelectStatusTask, activityTaskLocation]);
 
-    const groupAndSortTasks = useMemo(() => {
-        const priorityMap: { [key: string]: number } = PRIORITY.reduce((map, priority) => {
-            map[priority.value] = PRIORITY.indexOf(priority) + 1;
-            return map;
-        }, {} as { [key: string]: number });
-
-        const sortByPriority = (tasks: Task[]) =>
-            [...tasks].sort((a, b) => {
-                const priorityDiff = priorityMap[a.priority] - priorityMap[b.priority];
-                if (priorityDiff !== 0) {
-                    return priorityDiff;
-                }
-                if (a.createdAt < b.createdAt) return 1;
-                if (a.createdAt > b.createdAt) return -1;
-                return 0;
-            });
-
-        const sortByDate = (tasks: Task[]) =>
-            [...tasks].sort((a, b) => {
-                if (a.createdAt < b.createdAt) return 1;
-                if (a.createdAt > b.createdAt) return -1;
-                return 0;
-            });
-
-        if (valueSortedTask === 'priority') {
-            if (valueSelectStatusTask === 'all') {
-                return sortByPriority(tasks).reduce((groups, task) => {
-                    const date = formatDate(task.createdAt);
-                    if (!groups[date]) {
-                        groups[date] = [];
-                    }
-                    groups[date].push(task);
-                    return groups;
-                }, {} as { [key: string]: Task[] });
-            } else {
-                const filteredTasks = valueSelectStatusTask === 'doing'
-                    ? tasks.filter(task => !task.completed)
-                    : tasks.filter(task => task.completed);
-
-                return sortByPriority(filteredTasks).reduce((groups, task) => {
-                    const date = formatDate(task.createdAt);
-                    if (!groups[date]) {
-                        groups[date] = [];
-                    }
-                    groups[date].push(task);
-                    return groups;
-                }, {} as { [key: string]: Task[] });
-            }
-        } else {
-            if (valueSelectStatusTask === 'all') {
-                return sortByDate(tasks).reduce((groups, task) => {
-                    const date = formatDate(task.createdAt);
-                    if (!groups[date]) {
-                        groups[date] = [];
-                    }
-                    groups[date].push(task);
-                    return groups;
-                }, {} as { [key: string]: Task[] });
-            } else {
-                const filteredTasks = valueSelectStatusTask === 'doing'
-                    ? tasks.filter(task => !task.completed)
-                    : tasks.filter(task => task.completed);
-
-                return sortByDate(filteredTasks).reduce((groups, task) => {
-                    const date = formatDate(task.createdAt);
-                    if (!groups[date]) {
-                        groups[date] = [];
-                    }
-                    groups[date].push(task);
-                    return groups;
-                }, {} as { [key: string]: Task[] });
-            }
+    const selectedTasks = useMemo(() => {
+        switch (valueSelectStatusTask) {
+            case "all":
+                return token ? tasksAPI : tasks;
+            case "in progress":
+                return token ? activeTasksAPI : activeTasks;
+            case "completed":
+                return token ? completedTasksAPI : completedTasks;
         }
-    }, [tasks, valueSelectStatusTask, formatDate, PRIORITY, valueSortedTask])
+        return [];
+    }, [tasks, activeTasksAPI, completedTasksAPI, valueSelectStatusTask, tasksAPI, activeTasks, completedTasks])
+
+    const sortByDate = useCallback((tasks: Task[]) =>
+        [...tasks].sort((a, b) => {
+
+            if (a.createdAt !== null && b.createdAt !== null && a.createdAt < b.createdAt) return 1;
+            if (a.createdAt !== null && b.createdAt !== null && a.createdAt > b.createdAt) return -1;
+            return 0;
+        }), [tasks]);
+
+    const groupsByPriority = useMemo(() => {
+        const groupByDate = (priority: string) => {
+            return selectedTasks.filter(task => task.priority === priority)
+                .reduce((dateGroups, task) => {
+                    const date = formatDate(task.createdAt ? task.createdAt : null);
+                    if (!dateGroups[date]) {
+                        dateGroups[date] = [];
+                    }
+                    dateGroups[date].push(task);
+                    return dateGroups;
+                }, {} as { [key: string]: Task[] });
+        }
+        return PRIORITY.reduce((priorityGroups, priority) => {
+            priorityGroups[priority.value] = groupByDate(priority.value);
+            return priorityGroups;
+        }, {} as { [key: string]: { [key: string]: Task[] } });
+
+    }, [selectedTasks])
+
+    const groupsByDate = useMemo(() => {
+        return sortByDate(selectedTasks).reduce((groups, task) => {
+            const date = formatDate(task.completedAt ? task.completedAt : task.createdAt);
+            if (!groups[date]) {
+                groups[date] = [];
+            }
+            groups[date].push(task);
+            return groups;
+        }, {} as { [key: string]: Task[] });
+    }, [selectedTasks]);
 
     return (
         <Box
@@ -135,7 +119,14 @@ export const ActivityPage = () => {
                 backgroundColor: theme.palette.background.default,
                 flex: 1,
                 padding: "1rem 5rem",
-                overflow: "auto",
+                [theme.breakpoints.up('lg')]: {
+                    padding: "1rem 2rem",
+                },
+                [theme.breakpoints.down('sm')]: {
+                    padding: "1rem",
+                },
+                overflowY: "auto",
+                overflowX: "hidden",
             }}
         >
             <Box sx={{
@@ -147,53 +138,115 @@ export const ActivityPage = () => {
                 <Box sx={{display: "flex", justifyContent: "space-between"}}>
                     <Box sx={{display: "flex", alignItems: "center"}}>
                         <SortIcon/>
-                        <Sorting periods={SORTED_TASK} selectedText={valueSortedTask}
-                                 onTextChange={setValueSortedTask}/>
+                        <ActivitySorting periods={SORTED_TASK} selectedText={valueSortedTask}
+                                         onTextChange={setValueSortedTask}/>
                     </Box>
                     <Box sx={{display: "flex", alignItems: "center"}}>
                         <FilterListIcon/>
-                        <Sorting periods={STATUS_TASK} selectedText={valueSelectStatusTask}
-                                 onTextChange={setValueSelectStatusTask}/>
+                        <ActivitySorting periods={STATUS_TASK} selectedText={valueSelectStatusTask}
+                                         onTextChange={setValueSelectStatusTask}/>
                     </Box>
                 </Box>
 
-                {Object.entries(groupAndSortTasks).length === 0 ? (
-                    <Typography variant="body1">
-                        No tasks yet. Add a new task to get started.
-                    </Typography>
-                ) : (
-                    Object.entries(groupAndSortTasks).map(([date, tasks]) => (
-                        <Box
-                            key={date}
-                            sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.5rem"
-                            }}
-                        >
-                            <Typography variant="body1" sx={{fontWeight: 600}}>{date}</Typography>
-                            <Divider/>
-                            {tasks.map((task) => (
-                                <Box
-                                    key={task.id}
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: "0.5rem",
-                                    }}
-                                >
-                                    <ActivityListItem
-                                        completed={task.completed}
-                                        task={task}
-                                        boxRef={boxRef}
-                                        prioritySort={valueSortedTask === "priority"}
-                                    />
-                                    <Divider/>
-                                </Box>
-                            ))}
-                        </Box>
+                {valueSortedTask === 'priority' && (
+                    Object.entries(groupsByPriority).reverse().map(([priority, priorityTasks]) => (
+                        Object.values(priorityTasks).length > 0 && (
+                            <Box
+                                key={priority}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "0.5rem",
+                                }}
+                            >
+                                {Object.entries(priorityTasks).map(([date, tasks]) => (
+                                    <Fragment key={date}>
+                                        <Typography
+                                            variant="body1"
+                                            sx={{
+                                                fontWeight: 600,
+                                                [theme.breakpoints.down('sm')]: {
+                                                    fontSize: "0.9rem"
+                                                }
+                                            }}
+                                        >
+                                            {date}
+                                        </Typography>
+                                        <Divider/>
+
+                                        {tasks.map((task) => (
+                                            <Box
+                                                key={task.id}
+                                                sx={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    gap: "0.5rem",
+                                                }}
+                                            >
+                                                <ActivityListItem
+                                                    completed={task.completed}
+                                                    task={task}
+                                                    boxRef={boxRef}
+                                                    prioritySort
+                                                />
+                                                <Divider/>
+                                            </Box>
+                                        ))}
+                                    </Fragment>
+                                ))}
+                            </Box>
+                        )
                     ))
                 )}
+
+                {valueSortedTask === 'date' && (
+                    Object.entries(groupsByDate).reverse().map(([date, dateTasks]) => (
+                        Object.values(dateTasks).length > 0 && (
+                            <Box
+                                key={date}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "0.5rem",
+                                }}
+                            >
+
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        fontWeight: 600,
+                                        [theme.breakpoints.down('sm')]: {
+                                            fontSize: "0.9rem"
+                                        }
+                                    }}
+                                >
+                                    {date}
+                                </Typography>
+                                <Divider/>
+
+                                {Object.values(dateTasks).flat().map((task) => (
+                                    <Box
+                                        key={task.id}
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <ActivityListItem
+                                            completed={task.completed}
+                                            task={task}
+                                            boxRef={boxRef}
+                                            prioritySort={false}
+                                        />
+                                        <Divider/>
+                                    </Box>
+                                ))}
+                            </Box>
+                        )
+                    ))
+                )}
+
             </Box>
         </Box>
     )

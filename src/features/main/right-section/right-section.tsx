@@ -10,6 +10,8 @@ import Tooltip from "@mui/material/Tooltip";
 import {selectTasks} from "../../../components/task/task-slice";
 import {useNavigate} from "react-router-dom";
 import dayjs, {Dayjs} from "dayjs";
+import {selectTodoistTasks} from "../../../api/todoist-api";
+import {token} from "../../../utils/auth";
 
 export const RightSection = () => {
     const dispatch = useAppDispatch();
@@ -17,6 +19,7 @@ export const RightSection = () => {
     const navigate = useNavigate()
     const [value, setValue] = React.useState(0);
     const {tasks} = useAppSelector(selectTasks);
+    const tasksAPI = useAppSelector(selectTodoistTasks);
     const weekDates = getWeekDates();
 
     useEffect(() => {
@@ -31,8 +34,12 @@ export const RightSection = () => {
     }, [dispatch, weekDates, navigate]);
 
     const getActiveTasksForDate = useCallback((date: Dayjs) => {
-        return tasks.filter((task) => dayjs(task.scheduledDate).isSame(date, 'day') && !task.completed);
-    }, [tasks]);
+        if (token) {
+            return tasksAPI.filter((task) => dayjs(task.scheduledDate).isSame(date, 'day') && !task.completed);
+        } else {
+            return tasks.filter((task) => dayjs(task.scheduledDate).isSame(date, 'day') && !task.completed);
+        }
+    }, [tasks, tasksAPI, token]);
 
     const handleClickTab = useCallback(() => {
         navigate("/tasks");
@@ -45,7 +52,9 @@ export const RightSection = () => {
             backgroundColor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[100],
             left: 'auto',
             position: "relative",
-            // borderLeft: `1px solid ${theme.palette.divider}`
+            [theme.breakpoints.down('sm')]: {
+                width: "3.5rem"
+            },
         }}>
             <Tabs
                 orientation="vertical"
@@ -88,13 +97,6 @@ export const RightSection = () => {
                         key={index}
                         aria-label={`${tasks.length} tasks`}
                     >
-                        {/*<NavLink*/}
-                        {/*    to={`/tasks/${date}`}*/}
-                        {/*    style={{*/}
-                        {/*        textDecoration: 'none',*/}
-                        {/*        color: 'inherit'*/}
-                        {/*    }}*/}
-                        {/*>*/}
                         <Tab
                             onClick={handleClickTab}
                             label={
@@ -110,7 +112,6 @@ export const RightSection = () => {
                                 </Box>
                             }
                         />
-                    {/*</NavLink>*/}
                     </Tooltip>
                 ))}
             </Tabs>

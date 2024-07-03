@@ -1,12 +1,19 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {RootState} from "../../app/store";
 
+export enum SCREEN_NAMES {
+    HOME = "HOME",
+    TASK = "TASK",
+}
+
 export interface HeaderState {
+    currentScreenName: SCREEN_NAMES,
     avatarSrc: string;
     goalForDay: number;
 }
 
 const initialState: HeaderState = {
+    currentScreenName: SCREEN_NAMES.HOME,
     avatarSrc: "",
     goalForDay: 5,
 };
@@ -15,6 +22,9 @@ export const headerSlice = createSlice({
     name: 'headerSlice',
     initialState,
     reducers: {
+        setActiveScreen: (state, action) => {
+            state.currentScreenName = action.payload;
+        },
         setAvatarSrc: (state, action: PayloadAction<string>) => {
             state.avatarSrc = action.payload;
             localStorage.setItem('avatarSrc', action.payload);
@@ -27,6 +37,7 @@ export const headerSlice = createSlice({
 });
 
 export const {
+    setActiveScreen,
     setAvatarSrc,
     setGoalForDay,
 } = headerSlice.actions;

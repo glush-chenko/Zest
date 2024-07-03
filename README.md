@@ -1,4 +1,4 @@
-# Todoist Productivity Booster
+# Zest
 
 Zest is a powerful React-based application that helps you increase your productivity by leveraging the Todoist API. This app provides a seamless user experience, allowing you to manage your tasks and projects more efficiently.
 
@@ -22,9 +22,9 @@ Zest is a powerful React-based application that helps you increase your producti
 
 ## Getting Started
 
-To get started with Todoist Productivity Booster, follow these steps:
+To get started with Zest, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/your-username/todoist-productivity-booster.git`
+1. Clone the repository: `git clone https://github.com/your-username/Zest.git`
 2. Install dependencies: `npm install`
 3. Configure the Todoist API credentials: Create a `.env` file in the root directory and add your Todoist API key.
 4. Start the development server: `npm start`

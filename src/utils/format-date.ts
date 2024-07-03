@@ -1,6 +1,6 @@
 import dayjs, {Dayjs} from "dayjs";
 
-export const formatDate = (dateInMs: number): string => {
+export const formatDate = (dateInMs: number | null): string => {
     const date: Dayjs = dayjs(dateInMs);
     const today: Dayjs = dayjs();
     const yesterday: Dayjs = dayjs().subtract(1, 'day');

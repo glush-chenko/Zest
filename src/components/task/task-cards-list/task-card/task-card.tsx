@@ -1,9 +1,8 @@
-import React, {useCallback, useEffect, useMemo} from "react";
-import {completeTask, removeTask, selectTask, setEditingTaskId, Task} from "../../task-slice";
+import React, {useCallback, useMemo} from "react";
+import {completeTask, removeTask, setEditingTaskId, Task} from "../../task-slice";
 import CardHeader from "@mui/material/CardHeader";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import CheckIcon from "@mui/icons-material/Check";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import EditIcon from "@mui/icons-material/Edit";
@@ -16,12 +15,13 @@ import {useAppDispatch} from "../../../../app/hooks";
 import {useTheme} from "@mui/material";
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {AlertDialog} from "../../../generic/alert-dialog";
-import {useNavigate} from "react-router-dom";
 import Divider from '@mui/material/Divider';
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import {PRIORITY} from "../task-card-edit/task-card-edit";
+import {token} from "../../../../utils/auth";
+import {closeTask, deleteTaskSync} from "../../../../api/todoist-api";
+import {useNavigate} from "react-router-dom";
 
 export interface TaskCardProps {
     /**
@@ -31,21 +31,27 @@ export interface TaskCardProps {
 }
 
 export const TaskCard = (props: TaskCardProps) => {
+    const {task} = props;
+
     const dispatch = useAppDispatch();
     const theme = useTheme();
     const navigate = useNavigate();
-    const {task} = props;
+
     const [expanded, setExpanded] = React.useState(false);
     const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
-
 
     const handleExpandTask = useCallback(() => {
         setExpanded((prev) => !prev);
     }, []);
 
     const handleCompleteTask = useCallback((taskId: string) => {
-        dispatch(completeTask(taskId));
+        if (token) {
+            dispatch(closeTask(taskId))
+            navigate("/");
+        } else {
+            dispatch(completeTask(taskId));
+        }
     }, [dispatch]);
 
     const handleEditTask = useCallback((taskId: string) => {
@@ -53,8 +59,13 @@ export const TaskCard = (props: TaskCardProps) => {
     }, [dispatch]);
 
     const handleDeleteTask = useCallback((taskId: string) => {
-        dispatch(removeTask(taskId));
-        setOpenAlertDialog(false);
+        if (token) {
+            dispatch(deleteTaskSync(taskId));
+            navigate("/");
+        } else {
+            dispatch(removeTask(taskId));
+            setOpenAlertDialog(false);
+        }
     }, [dispatch]);
 
     const handleCancelTask = useCallback(() => {
@@ -66,16 +77,13 @@ export const TaskCard = (props: TaskCardProps) => {
     }, []);
 
     const handleTaskClick = useCallback((taskId: string) => {
-        // dispatch(selectTask(taskId));
         dispatch(setEditingTaskId(taskId));
-        // navigate(`/tasks/${taskId}`);
     }, [dispatch])
 
     const getPriorityLabel = useMemo(() => {
         const priorityItem = PRIORITY.find(item => item.value === task.priority);
         return priorityItem ? priorityItem.label : "";
     }, [PRIORITY, task]);
-
 
     return (
         <>
@@ -108,6 +116,10 @@ export const TaskCard = (props: TaskCardProps) => {
                                         }}
                                     >
                                         <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center"
+                                            }}
                                             onMouseEnter={() => setIsHovered(true)}
                                             onMouseLeave={() => setIsHovered(false)}
                                         >

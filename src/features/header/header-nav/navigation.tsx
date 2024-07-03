@@ -9,7 +9,7 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import {FormControlLabel, useTheme} from "@mui/material";
+import {ClickAwayListener, FormControlLabel, useTheme} from "@mui/material";
 import {ThemeSwitch} from "../../../components/styled/theme-switch";
 import logo from "../../../assets/zest-logo.png"
 import logo2 from "../../../assets/zest-logo2.png"
@@ -22,29 +22,46 @@ import {selectHeader, setAvatarSrc, setGoalForDay} from "../header-slice";
 import {selectTasks} from "../../../components/task/task-slice";
 import {selectRightSection} from "../../main/right-section/right-section-slice";
 import {HeaderSearch} from "../header-search/header-search";
+import Skeleton from '@mui/material/Skeleton';
+import {selectTodoistCompletedTasks} from "../../../api/todoist-api";
+import dayjs from "dayjs";
+import {token} from "../../../utils/auth";
+import MenuIcon from '@mui/icons-material/Menu';
 
 enum SETTINGS {
     PROFILE = 'Profile',
     PRODUCTIVITY = "Productivity",
 }
 
-const PAGES = ['tasks', 'activity', 'about', 'contact'];
+const PAGES = ["Home", 'Tasks', 'Activity', 'About'];
 const SETTINGS_MENU_ITEMS = [SETTINGS.PROFILE, SETTINGS.PRODUCTIVITY];
 
-export const Navigation = () => {
+interface NavigationProps {
+    isLoggedIn: boolean;
+}
+
+export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
     const theme = useTheme();
     const dispatch = useAppDispatch();
     const location = useLocation();
+    const {enqueueSnackbar, closeSnackbar} = useSnackbarWithAction();
+
     const drawer = useAppSelector(selectDrawerOpen);
     const {tasks} = useAppSelector(selectTasks);
+    const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
     const {avatarSrc, goalForDay} = useAppSelector(selectHeader);
-    const {enqueueSnackbar, closeSnackbar} = useSnackbarWithAction();
+
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+    const [anchorElPage, setAnchorElPage] = React.useState<null | HTMLElement>(null);
 
     const completedTasksForDay = useMemo(() => {
-        return tasks.filter((t) => t.completed && t.scheduledDate === selectedDate).length;
-    }, [tasks, selectedDate]);
+        if (token) {
+            return completedTasksAPI.filter((t) => dayjs(t.completedAt).startOf("day").valueOf() === selectedDate).length;
+        } else {
+            return tasks.filter((t) => t.completed && t.scheduledDate === selectedDate).length;
+        }
+    }, [completedTasksAPI, selectedDate, tasks, token]);
 
     useEffect(() => {
         const savedAvatar = localStorage.getItem('avatarSrc');
@@ -68,8 +85,16 @@ export const Navigation = () => {
         setAnchorElUser(event.currentTarget);
     }, []);
 
+    const handleOpenPageMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElPage(event.currentTarget);
+    }, []);
+
     const handleCloseUserMenu = useCallback(() => {
         setAnchorElUser(null);
+    }, []);
+
+    const handleClosePageMenu = useCallback(() => {
+        setAnchorElPage(null);
     }, []);
 
     const handleChangeTheme = useCallback(() => {
@@ -85,7 +110,19 @@ export const Navigation = () => {
                 // backgroundColor: theme.palette.mode === "dark" ? theme.palette.grey[900] : theme.palette.secondary.main
             }}
         >
-            <Container maxWidth={false}>
+            <Container
+                maxWidth={false}
+                sx={{
+                    [theme.breakpoints.down('md')]: {
+                        paddingLeft: 1.25,
+                        paddingRight: 1.25
+                    },
+                    [theme.breakpoints.down('sm')]: {
+                        paddingLeft: 0.75,
+                        paddingRight: 0.75
+                    },
+                }}
+            >
                 <Toolbar disableGutters>
                     <Box
                         component="img"
@@ -100,41 +137,58 @@ export const Navigation = () => {
                     >
                     </Box>
 
-                    {/*<Box sx={{flexGrow: 1, display: {xs: 'flex', md: 'none'}}}/>*/}
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="/"
-                        sx={{
-                            mr: 2,
-                            display: {xs: 'flex', md: 'none'},
-                            flexGrow: 1,
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Zest
-                    </Typography>
+                    <Box sx={{flexGrow: 0}}>
+                        <Tooltip title="Open pages">
+                            <IconButton
+                                size="large"
+                                color="inherit"
+                                aria-label="open page"
+                                sx={{display: {xs: 'flex', md: 'none'}}}
+                                onClick={handleOpenPageMenu}
+                            >
+                                <MenuIcon/>
+                            </IconButton>
+                        </Tooltip>
+
+                        <Menu
+                            sx={{mt: '3rem', display: {xs: 'flex', md: 'none'}}}
+                            anchorEl={anchorElPage}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'center',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'center',
+                            }}
+                            open={Boolean(anchorElPage)}
+                            onClose={handleClosePageMenu}
+                        >
+                            {PAGES.map((page) => (
+                                <NavLink
+                                    to={page === 'Home' ? '/' : `/${page.toLowerCase()}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: 'inherit'
+                                    }}
+                                    key={`navigation-link-${page}`}
+                                >
+                                    <MenuItem
+                                        key={`navigation-link-${page}`}
+                                        onClick={handleClosePageMenu}
+                                    >
+                                        <Typography textAlign="center">{page}</Typography>
+                                    </MenuItem>
+                                </NavLink>
+                            ))}
+                        </Menu>
+                    </Box>
 
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
-                        <NavLink
-                            to="/"
-                            style={{
-                                textDecoration: 'none',
-                                color: 'inherit'
-                            }}
-                        >
-                            <Button sx={{my: 2, color: 'white', display: 'block', margin: 0}}>
-                                Home
-                            </Button>
-                        </NavLink>
                         {PAGES.map((page) => (
                             <NavLink
-                                to={`/${page}`}
+                                to={page === 'Home' ? "/" : `/${page.toLowerCase()}`}
                                 style={{
                                     textDecoration: 'none',
                                     color: 'inherit'
@@ -143,6 +197,11 @@ export const Navigation = () => {
                             >
                                 <Button
                                     sx={{
+                                        [theme.breakpoints.down('md')]: {
+                                            fontSize: "smaller",
+                                            minWidth: 0,
+                                            fontWeight: "normal"
+                                        },
                                         my: 2,
                                         color: theme.palette.common.white,
                                         display: 'block',
@@ -155,8 +214,36 @@ export const Navigation = () => {
                         ))}
                     </Box>
 
+                    <Box
+                        sx={{
+                            display: {xs: 'flex', md: 'none'},
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexGrow: 1,
+                            [theme.breakpoints.down('sm')]: {
+                                justifyContent: "flex-start",
+                                marginLeft: "1rem"
+                            },
+                        }}
+                    >
+                        <Typography
+                            variant="h5"
+                            noWrap
+                            component="a"
+                            href="/"
+                            sx={{
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: 'inherit',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            Zest
+                        </Typography>
+                    </Box>
+
                     <Box sx={{display: "flex", gap: "1rem"}}>
-                        <HeaderSearch />
+                        <HeaderSearch/>
 
                         <FormControlLabel
                             control={
@@ -174,10 +261,15 @@ export const Navigation = () => {
 
                         <Box sx={{flexGrow: 0}}>
                             <Tooltip title="Open settings">
-                                <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                    <Avatar src={avatarSrc} alt="avatar image"/>
-                                </IconButton>
+                                {isLoggedIn ? (
+                                    <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                                        <Avatar src={avatarSrc} alt="avatar image"/>
+                                    </IconButton>
+                                ) : (
+                                    <Skeleton variant="circular" width={40} height={40}/>
+                                )}
                             </Tooltip>
+
                             <Menu
                                 sx={{mt: '3rem'}}
                                 anchorEl={anchorElUser}

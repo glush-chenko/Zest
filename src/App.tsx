@@ -9,7 +9,7 @@ import {
 import {Root} from "./routes/root";
 import {HomePage} from "./pages/home/home-page";
 import {ThemeProvider} from "./theme/theme-provider/theme-provider";
-import React from "react";
+import React, {useEffect} from "react";
 import {CssBaseline} from "@mui/material";
 import {TaskModal} from "./components/task/task-modal/task-modal";
 import {Content} from "./features/main/content/content";
@@ -21,9 +21,13 @@ import dayjs from "dayjs";
 import {ActivityPage} from "./pages/activity/activity-page";
 import {HeaderModalProfile} from "./features/header/header-modal-profile/header-modal-profile";
 import {HeaderModalProductivity} from "./features/header/header-modal-productivity/header-modal-productivity";
-import {ActivityCard} from "./pages/activity/activity-card/activity-card";
-import {ActivityListItem} from "./pages/activity/activity-list-item/activity-list-item";
 import {SearchPage} from "./pages/search/search-page";
+import {LoginPage} from "./pages/login/login-page";
+import {CallbackHandler} from "./pages/login/callback-handler/callback-handler";
+import {PrivateRoute} from "./routes/private-route/PrivateRoute";
+import {Loading} from "./components/generic/loading";
+import {useAppDispatch} from "./app/hooks";
+import {setScreenWidth} from "./features/screen-slice";
 
 dayjs.extend(updateLocale);
 
@@ -35,23 +39,38 @@ dayjs.updateLocale('en', {
 
 const appRouter = createBrowserRouter(createRoutesFromElements(
     <Route path="/" element={<Root/>}>
-        <Route index element={<HomePage/>}/>
-        <Route path="add-task" element={<TaskModal/>}/>
-        <Route path="tasks" element={<Content/>}>
-            <Route path=":id" element={<TaskEditModal/>}/>
+        <Route index element={<PrivateRoute><HomePage /></PrivateRoute>}/>
+        <Route path="add-task" element={<PrivateRoute><TaskModal/></PrivateRoute>}/>
+        <Route path="tasks" element={<PrivateRoute><Content/></PrivateRoute>}>
+            <Route path=":id" element={<PrivateRoute><TaskEditModal/></PrivateRoute>}/>
         </Route>
         <Route path="about" element={<AboutPage/>}/>
-        <Route path="productivity" element={<HeaderModalProductivity />}/>
-        <Route path="profile" element={<HeaderModalProfile/>}/>
-        <Route path="activity" element={<ActivityPage/>} >
-            <Route path=":id" element={<ActivityPage />} />
+        <Route path="productivity" element={<PrivateRoute><HeaderModalProductivity /></PrivateRoute>}/>
+        <Route path="profile" element={<PrivateRoute><HeaderModalProfile/></PrivateRoute>}/>
+        <Route path="activity" element={<PrivateRoute><ActivityPage/></PrivateRoute>} >
+            <Route path=":id" element={<PrivateRoute><ActivityPage /></PrivateRoute>} />
         </Route>
-        <Route path="search" element={<SearchPage/>}/>
+        <Route path="search" element={<PrivateRoute><SearchPage/></PrivateRoute>}/>
+        <Route path="callback" element={<CallbackHandler />}/>
+        <Route path="login" element={<LoginPage />}/>
         <Route path="*" element={<Navigate to="/" replace />} />
     </Route>
 ));
 
 function App() {
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        const handleResize = () => {
+            dispatch(setScreenWidth(window.innerWidth));
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [dispatch]);
 
     return (
         <ThemeProvider>

@@ -1,13 +1,17 @@
-import React, {useCallback, useEffect, useMemo} from "react";
+import React, {useCallback, useEffect, useRef} from "react";
 import {alpha, styled} from "@mui/material/styles";
-import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import {useNavigate, createSearchParams, Form} from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import {Autocomplete, AutocompleteProps, FilterOptionsState, useTheme} from "@mui/material";
+import {Autocomplete, FilterOptionsState, Slide, useTheme} from "@mui/material";
 import {selectTasks, Task} from "../../../components/task/task-slice";
 import {useAppSelector} from "../../../app/hooks";
 import TextField from "@mui/material/TextField";
+import {selectTodoistCompletedTasks, selectTodoistTasks} from "../../../api/todoist-api";
+import {token} from "../../../utils/auth";
+import {selectScreenSizes} from "../../screen-slice";
+import Fade from '@mui/material/Fade';
+import Collapse from "@mui/material/Collapse";
 
 const Search = styled('div')(({theme}) => ({
     display: 'flex',
@@ -19,7 +23,7 @@ const Search = styled('div')(({theme}) => ({
     },
     marginLeft: 0,
     width: '100%',
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
         marginLeft: theme.spacing(1),
         width: 'auto',
     },
@@ -31,34 +35,32 @@ const SearchIconWrapper = styled('div')(({theme}) => ({
     justifyContent: 'center',
 }));
 
-const StyledInputBase = styled(InputBase)(({theme}) => ({
-    color: 'inherit',
-    width: '100%',
-    '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        // paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create('width'),
-        [theme.breakpoints.up('sm')]: {
-            width: '12ch',
-            '&:focus': {
-                width: '20ch',
-            },
-        },
-    },
-}));
-
-const StyledAutocomplete = styled(Autocomplete)<{ options: Task[] }>(({ theme }) => ({
+const StyledAutocomplete = styled(Autocomplete<Task>)(({theme}) => ({
     '& .MuiInputBase-root': {
         color: 'inherit',
         width: '100%',
+        padding: 0,
+        "& .MuiOutlinedInput-notchedOutline": {
+            border: 'none',
+        },
         '& .MuiInputBase-input': {
-            padding: theme.spacing(1, 1, 1, 0),
-            paddingLeft: `calc(1em + ${theme.spacing(4)})`,
             transition: theme.transitions.create('width'),
-            [theme.breakpoints.up('sm')]: {
-                width: '12ch',
+            [theme.breakpoints.up('md')]: {
+                width: '10ch',
                 '&:focus': {
-                    width: '20ch',
+                    width: '15ch',
+                },
+            },
+            [theme.breakpoints.down('md')]: {
+                width: '5ch',
+                '&:focus': {
+                    width: '15ch',
+                },
+            },
+            [theme.breakpoints.down('sm')]: {
+                width: 0,
+                '&:focus': {
+                    width: '5ch',
                 },
             },
         },
@@ -68,105 +70,124 @@ const StyledAutocomplete = styled(Autocomplete)<{ options: Task[] }>(({ theme })
 export const HeaderSearch = () => {
     const theme = useTheme();
     const navigate = useNavigate();
+    const autocompleteRef = useRef<HTMLDivElement | null>(null);
+    const searchRef = useRef(null);
+
     const {tasks} = useAppSelector(selectTasks);
-    const inputRef = React.useRef<HTMLInputElement>(null);
+    const activeTasksAPI = useAppSelector(selectTodoistTasks);
+    const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
+    const screenSizes = useAppSelector(selectScreenSizes);
+    const tasksAPI = [...activeTasksAPI, ...completedTasksAPI];
+
     const [currentSearchQuery, setCurrentSearchQuery] = React.useState('');
-    const [currentTaskName, setCurrentTaskName] = React.useState<string | null>(tasks[0].name);
+    const [currentTask, setCurrentTask] = React.useState<Task | null>(null);
     const [showOptions, setShowOptions] = React.useState(false);
-
-    // console.log("1", currentSearchQuery)
-    // console.log("2",tasks[0].name)
-    // console.log("3",tasks[0].name.toLowerCase().includes(currentSearchQuery.toLowerCase()))
-    //
-    const newArr = useMemo(() => {
-        return tasks.filter((task) => {
-            return task.name.toLowerCase().includes(currentSearchQuery.toLowerCase());
-        });
-    }, [tasks, currentSearchQuery])
-
-    // console.log(newArr)
+    const [searchToggle, setSearchToggle] = React.useState(false);
 
     useEffect(() => {
-        if (inputRef.current) {
-            inputRef.current.focus();
+        if (screenSizes.isMedium) {
+            setSearchToggle(true);
+        } else {
+            setSearchToggle(false);
         }
-
-        if (!currentSearchQuery.length) {
-            navigate("/tasks");
-        }
-    }, [currentSearchQuery, inputRef]);
+    }, [screenSizes]);
 
     const onSearchHandler = useCallback((e: React.FormEvent) => {
         e.preventDefault();
 
-        const searchQuery = {
-            name: currentSearchQuery
-        }
+        if (currentSearchQuery) {
+            const query = createSearchParams({
+                name: currentSearchQuery
+            });
 
-        const query = createSearchParams(searchQuery);
+            navigate({
+                pathname: "/search",
+                search: `?${query}`
+            })
+        }
+    }, [currentSearchQuery]);
+
+    const onAutoComplete = useCallback((task: Task) => {
+        const query = createSearchParams({
+            id: task.id
+        });
+
         navigate({
             pathname: "/search",
             search: `?${query}`
         })
-    }, [currentSearchQuery])
+    }, [])
 
     const filterOptions = (options: Task[], state: FilterOptionsState<Task>) => {
-        // return options.filter((option) =>
-        //     option.name.toLowerCase().startsWith(state.inputValue.toLowerCase())
-        // );
-
-        return options.filter((option) => option.name.toLowerCase().includes(state.inputValue.toLowerCase()));
+        return options.filter((option) => option.name.toLowerCase().includes(currentSearchQuery.toLowerCase()));
     };
 
+    const handleSearchToggle = useCallback(() => {
+        setSearchToggle((prevState) => !prevState);
+    }, []);
+
+    const handleAutocompleteBlur = useCallback(() => {
+        if (screenSizes.isMedium) {
+            if (!autocompleteRef.current?.contains(document.activeElement)) {
+                setSearchToggle(true);
+            }
+        }
+    }, [autocompleteRef, screenSizes]);
 
     return (
-        <Search>
-            <SearchIconWrapper>
-                <IconButton type="submit" aria-label="search" sx={{cursor: "pointer"}} onClick={onSearchHandler}>
-                    <SearchIcon sx={{color: theme.palette.primary.contrastText}}/>
-                </IconButton>
-            </SearchIconWrapper>
+        <>
+            {searchToggle ? (
+                <Fade in={searchToggle} timeout={350}>
+                    <IconButton type="submit" aria-label="search" sx={{cursor: 'pointer'}} onClick={handleSearchToggle}>
+                        <SearchIcon sx={{color: theme.palette.primary.contrastText}}/>
+                    </IconButton>
+                </Fade>
+            ) : (
+                // <Collapse in={!searchToggle} timeout={350} collapsedSize={40} orientation="horizontal">
+                    <Search>
+                        <SearchIconWrapper>
+                            <IconButton type="submit" aria-label="search" sx={{cursor: "pointer"}}
+                                        onClick={onSearchHandler}>
+                                <SearchIcon sx={{color: theme.palette.primary.contrastText}}/>
+                            </IconButton>
+                        </SearchIconWrapper>
 
-            {/*<Form onSubmit={onSearchHandler}>*/}
-            {/*    <StyledAutocomplete*/}
-            {/*        value={currentTaskName}*/}
-            {/*        onChange={(event, value, reason, details) => {*/}
-            {/*            setCurrentTaskName(value as string | null);*/}
-            {/*            setShowOptions(false);*/}
-            {/*        }}*/}
-            {/*        inputValue={currentSearchQuery}*/}
-            {/*        onInputChange={(_, newInputValue) => {*/}
-            {/*            setCurrentSearchQuery(newInputValue);*/}
-            {/*            // setCurrentTask(tasks.find((task) => task.name === newInputValue) || null);*/}
-            {/*        }}*/}
-            {/*        options={newArr}*/}
-            {/*        disablePortal*/}
-            {/*        getOptionLabel={(option) => (option as Task).name}*/}
-            {/*        open={showOptions}*/}
-            {/*        renderInput={(params) => (*/}
-            {/*            <TextField {...params} label="Controllable" />*/}
-            {/*            // <InputBase*/}
-            {/*            //     {...params}*/}
-            {/*            //     ref={inputRef}*/}
-            {/*            //     placeholder="Search…"*/}
-            {/*            //     // inputProps={{ 'aria-label': 'search' }}*/}
-            {/*            //     onChange={(e) => setCurrentSearchQuery(e.target.value)}*/}
-            {/*            // />*/}
-            {/*            // <StyledInputBase*/}
-            {/*            //     ref={inputRef}*/}
-            {/*            //     placeholder="Search…"*/}
-            {/*            //     inputProps={{'aria-label': 'search'}}*/}
-            {/*            //     onChange={(e) => setCurrentSearchQuery(e.target.value)}*/}
-            {/*            // />*/}
-            {/*        )}*/}
-            {/*    />*/}
-
-                <StyledInputBase
-                    placeholder="Search…"
-                    inputProps={{'aria-label': 'search'}}
-                    onChange={(e) => setCurrentSearchQuery(e.target.value)}
-                />
-            {/*</Form>*/}
-        </Search>
+                        <Form onSubmit={onSearchHandler}>
+                            <StyledAutocomplete
+                                ref={autocompleteRef}
+                                onBlur={handleAutocompleteBlur}
+                                value={currentTask}
+                                onChange={(event: any, newValue: Task | null) => {
+                                    setCurrentTask(newValue);
+                                    setCurrentSearchQuery(newValue?.name ?? "");
+                                    if (newValue) {
+                                        onAutoComplete(newValue)
+                                    }
+                                }}
+                                onInputChange={(_, newInputValue, reason) => {
+                                    setCurrentSearchQuery(newInputValue);
+                                }}
+                                options={token ? tasksAPI : tasks}
+                                filterOptions={filterOptions}
+                                getOptionLabel={(option: Task) => option.name}
+                                open={!!currentSearchQuery && showOptions}
+                                onOpen={() => {
+                                    setShowOptions(true);
+                                }}
+                                clearOnBlur={false}
+                                clearOnEscape
+                                onClose={() => {
+                                    setShowOptions(false);
+                                }}
+                                autoComplete
+                                renderInput={(params) => (
+                                    <TextField {...params} autoFocus aria-label="search-panel"/>
+                                )}
+                            />
+                        </Form>
+                    </Search>
+                // </Collapse>
+            )}
+        </>
     )
 }

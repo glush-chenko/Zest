@@ -29,9 +29,9 @@ describe('HeaderModalProductivity', () => {
             if (selector === selectTasks) {
                 return {
                     tasks: [
-                        { id: '1', name: 'Task 1', description: 'Description 1', completed: true, scheduledDate: 1686902400000, priority: 'high', createdAt: 1686816000000, completedAt: 1686902400000 },
-                        { id: '2', name: 'Task 2', description: 'Description 2', completed: false, scheduledDate: 1686902400000, priority: 'medium', createdAt: 1686816000000 },
-                        { id: '3', name: 'Task 3', description: 'Description 3', completed: false, scheduledDate: 1686815999000, priority: 'low', createdAt: 1686729600000 },
+                        { id: '1', name: 'Task 1', description: 'Description 1', completed: true, scheduledDate: 1686902400000, priority: '1', createdAt: 1686816000000, completedAt: 1686902400000 },
+                        { id: '2', name: 'Task 2', description: 'Description 2', completed: false, scheduledDate: 1686902400000, priority: '2', createdAt: 1686816000000 },
+                        { id: '3', name: 'Task 3', description: 'Description 3', completed: false, scheduledDate: 1686815999000, priority: '3', createdAt: 1686729600000 },
                     ],
                 };
             } else if (selector === selectRightSection) {

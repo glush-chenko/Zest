@@ -2,7 +2,6 @@ import React from "react";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import {NavLink} from "react-router-dom";
 
 interface SortingProps {
     periods: { period?: string; text: string }[];
@@ -10,7 +9,7 @@ interface SortingProps {
     onTextChange: (period: string) => void;
 }
 
-export const Sorting = (props: SortingProps) => {
+export const ActivitySorting = (props: SortingProps) => {
     const {periods, selectedText, onTextChange} = props;
 
     return (
@@ -36,17 +35,16 @@ export const Sorting = (props: SortingProps) => {
             variant="outlined"
         >
             {periods.map((period) => (
-                    <MenuItem
-                        value={period.text}
-                        key={`option ${period.text}`}
-                    >
-                        <Typography variant="subtitle2">
-                            {period.text.toUpperCase()}
-                        </Typography>
-                    </MenuItem>
+                <MenuItem
+                    value={period.text}
+                    key={`option ${period.text}`}
+                >
+                    <Typography variant="subtitle2">
+                        {period.text.toUpperCase()}
+                    </Typography>
+                </MenuItem>
             ))}
 
         </TextField>
     )
-
 }
