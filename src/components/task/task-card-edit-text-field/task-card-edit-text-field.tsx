@@ -71,6 +71,9 @@ export const TaskCardEditTextField = (props: TaskCardEditTextFieldProps) => {
                     },
                 }}
                 value={description}
+                inputProps={{
+                    maxLength: 200,
+                }}
                 onChange={(e) => onDescriptionFieldChange(e.target.value)}
                 label="Description"
                 disabled={completed ? completed : undefined}

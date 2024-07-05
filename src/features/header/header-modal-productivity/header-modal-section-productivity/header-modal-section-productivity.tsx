@@ -27,6 +27,12 @@ export const HeaderModalSectionProductivity = (props: HeaderModalSectionProducti
                 <Typography
                     variant="body1"
                     color={theme.palette.mode === "light" ? theme.palette.grey[600] : theme.palette.common.white}
+                    sx={{
+                        textAlign: "center",
+                        [theme.breakpoints.down('sm')]: {
+                            fontSize: "0.9rem",
+                        },
+                    }}
                 >
                     {text}
                 </Typography>
@@ -40,9 +46,11 @@ export const HeaderModalSectionProductivity = (props: HeaderModalSectionProducti
                     />
                 </Tooltip>
             </Box>
-            <Typography variant="body1" sx={{fontWeight: 600}}>
-                {chartData}%
-            </Typography>
+            {(chartData !== "NaN") && (
+                <Typography variant="body1" sx={{fontWeight: 600}}>
+                    {chartData}%
+                </Typography>
+            )}
         </Box>
     )
 }

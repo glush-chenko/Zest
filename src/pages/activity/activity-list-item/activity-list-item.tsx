@@ -92,7 +92,6 @@ export const ActivityListItem = (props: ActivityCardProps) => {
             <Box
                 sx={{
                     display: "flex",
-                    // flexDirection: "column",
                     gap: "0.5rem",
                     overflow: "hidden"
                 }}

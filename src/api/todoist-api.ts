@@ -3,18 +3,32 @@ import {RootState} from "../app/store";
 import {Task} from "../components/task/task-slice";
 import dayjs from "dayjs";
 import {v4 as uuidv4} from 'uuid';
+import {ActivityEventType} from "../types/activity-event";
 
 interface ZestState {
     tasks: Task[],
     completedTasks: Task[],
+    productivityTasks: Task[],
     selectedActivityTask: Task | null,
     loading: boolean,
     error: string | null;
 }
 
+interface GetActivityLogParams {
+    page?: number;
+    limit?: number;
+    eventType?: ActivityEventType;
+    objectType?: 'item' | 'note' | 'project';
+    objectId?: string;
+    parentProjectId?: string;
+    parentItemId?: string;
+    initiatorId?: string;
+}
+
 const initialState: ZestState = {
     tasks: JSON.parse(localStorage.getItem('todoist_tasks_api') || '[]'),
     completedTasks: JSON.parse(localStorage.getItem('todoist_completed_tasks_api') || '[]'),
+    productivityTasks: [],
     selectedActivityTask: null,
     loading: false,
     error: null
@@ -229,7 +243,7 @@ export const getActivityTaskById = createAsyncThunk(
 
 export const syncTodosLoadTasks = createAsyncThunk(
     'todoist/syncTodos',
-    async (_, { rejectWithValue }) => {
+    async (_, {rejectWithValue}) => {
         try {
             const response = await fetch('https://api.todoist.com/sync/v9/sync', {
                 method: 'POST',
@@ -256,6 +270,35 @@ export const syncTodosLoadTasks = createAsyncThunk(
     }
 );
 
+export const getActivityLog = createAsyncThunk(
+    'activity/getActivityLog',
+    async (params: GetActivityLogParams, {rejectWithValue}) => {
+        try {
+            const url = new URL('https://api.todoist.com/sync/v9/activity/get');
+            url.searchParams.append('page', params.page?.toString() || '0');
+            url.searchParams.append('limit', params.limit?.toString() || '30');
+
+            if (params.eventType) {
+                url.searchParams.append('event_type', params.eventType);
+            }
+
+            const response = await fetch(url.toString(), {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('todoist_access_token')}`,
+                },
+            });
+
+            if (!response.ok) {
+                return rejectWithValue(await response.json());
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
 
 const todoistSlice = createSlice({
     name: 'todoist',
@@ -276,11 +319,10 @@ const todoistSlice = createSlice({
                     completed: false,
                     scheduledDate: task.due ? dayjs(task.due.date).startOf("day").valueOf() : null,
                     priority: `${task.priority}`,
-                    // createdAt: task.created_at,
                     createdAt: task.added_at,
                     completedAt: task.completed_at,
                 }));
-                localStorage.setItem("lastSyncToken",  action.payload.sync_token);
+                localStorage.setItem("lastSyncToken", action.payload.sync_token);
             })
             .addCase(syncTodosLoadTasks.rejected, (state, action) => {
                 state.loading = false;
@@ -353,12 +395,34 @@ const todoistSlice = createSlice({
                 state.loading = false;
                 state.error = action.error.message ?? 'Unknown error';
             })
+            .addCase(getActivityLog.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getActivityLog.fulfilled, (state, action: PayloadAction<any>) => {
+                state.loading = false;
+                state.productivityTasks = action.payload.events.map((task: any): Task => ({
+                    id: task.id,
+                    name: task.extra_data.content,
+                    description: "",
+                    completed: task.event_type === "completed" ? true : false,
+                    scheduledDate: task.extra_data.due_date ? dayjs(task.extra_data.due_date).startOf("day").valueOf() : null,
+                    priority: "1",
+                    createdAt: task.event_date,
+                    completedAt: null,
+                }));
+            })
+            .addCase(getActivityLog.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message ?? 'Unknown error';
+            })
     }
 })
 
 export const selectTodoistTasks = (state: RootState) => state.todoistSlice.tasks;
 export const selectTodoistCompletedTasks = (state: RootState) => state.todoistSlice.completedTasks;
 export const selectTodoistSelectedActivityTask = (state: RootState) => state.todoistSlice.selectedActivityTask;
+export const selectTodoistSelectedProductivityTasks = (state: RootState) => state.todoistSlice.productivityTasks;
 export const selectTodoistLoading = (state: RootState) => state.todoistSlice.loading;
 
 export default todoistSlice.reducer;

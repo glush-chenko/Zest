@@ -1,22 +1,23 @@
 import React from "react";
 import { useRouteError } from "react-router-dom";
+import Box from "@mui/material/Box";
 
 export const ErrorPage = () => {
     const error = useRouteError();
 
     if (error instanceof Error) {
         return (
-            <div >
+            <Box>
                 <h1>Oops!</h1>
                 <p>Sorry, an unexpected error has occurred.</p>
                 <p>
                     <i>{error.message}</i>
                 </p>
-            </div>
+            </Box>
         )
     } else if (typeof error === 'object' && error !== null) {
         return (
-            <div>
+            <Box>
                 <h1>Oops!</h1>
                 <p>Sorry, an unexpected error has occurred.</p>
                 <p>
@@ -26,17 +27,17 @@ export const ErrorPage = () => {
                             'Unknown error'}
                     </i>
                 </p>
-            </div>
+            </Box>
         )
     } else {
         return (
-            <div>
+            <Box>
                 <h1>Oops!</h1>
                 <p>Sorry, an unexpected error has occurred.</p>
                 <p>
                     <i>Unknown error</i>
                 </p>
-            </div>
+            </Box>
         )
     }
 }

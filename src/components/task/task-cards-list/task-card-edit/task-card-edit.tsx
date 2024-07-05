@@ -79,7 +79,6 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
     const [date, setDate] = React.useState<Dayjs | null>(dayjs());
     const [nameError, setNameError] = React.useState<boolean>(false);
     const [selectedPriority, setSelectedPriority] = React.useState("1");
-    const [isHovered, setIsHovered] = React.useState(false);
 
     useEffect(() => {
         if (selectedTask) {
@@ -173,8 +172,7 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
             variant="outlined"
             sx={{
                 width: "100%",
-                height: "100%",
-                padding: "1rem"
+                // height: "100%",
             }}
         >
 
@@ -184,6 +182,9 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                     flexDirection: "column",
                     justifyContent: "flex-start",
                     gap: "3rem",
+                    [theme.breakpoints.down('md')]: {
+                        gap: "2rem"
+                    },
                 }}
             >
                 <Box sx={{display: "flex", gap: "1rem"}}>
@@ -207,14 +208,33 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                                         <CheckCircleIcon sx={{fontSize: "1.7rem"}}/>
                                     </Box>
                                 ) : (
-                                    <Box
-                                        onMouseEnter={() => setIsHovered(true)}
-                                        onMouseLeave={() => setIsHovered(false)}
-                                    >
-                                        {isHovered ?
-                                            <CheckCircleOutlineIcon sx={{fontSize: "1.7rem"}}/> :
-                                            <RadioButtonUncheckedIcon sx={{fontSize: "1.7rem"}}/>
-                                        }
+                                    <Box sx={{
+                                        "& .MuiCardHeader-content": {
+                                            overflowWrap: "anywhere"
+                                        },
+                                        "& .check-circle": {
+                                            display: "none",
+                                        },
+                                        "& .unchecked-radio": {
+                                            display: "flex",
+                                        },
+                                        "&:hover": {
+                                            "& .check-circle": {
+                                                display: "flex",
+                                            },
+                                            "& .unchecked-radio": {
+                                                display: "none",
+                                            },
+                                        },
+                                    }}>
+                                        <CheckCircleOutlineIcon
+                                            className="check-circle"
+                                            sx={{fontSize: "1.7rem"}}
+                                        />
+                                        <RadioButtonUncheckedIcon
+                                            className="unchecked-radio"
+                                            sx={{fontSize: "1.7rem"}}
+                                        />
                                     </Box>
                                 )}
                             </IconButton>
@@ -252,41 +272,50 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                 </Box>
 
                 <Box
+                    flexDirection={{xs: 'column', md: 'row'}}
                     sx={{
                         display: "flex",
                         gap: "1rem",
                         justifyContent: "space-between",
+                        alignItems: "center",
+                        [theme.breakpoints.down('md')]: {
+                            gap: "0.5rem"
+                        },
                     }}
                 >
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                            slotProps={{
-                                textField: {
-                                    size: "small",
-                                    style: {
-                                        maxWidth: "9rem",
-                                        width: "100%"
-                                    },
-                                }
-                            }}
-                            sx={{
-                                alignItems: "flex-start",
-                                display: "flex",
-                                height: "100%",
-                            }}
-                            value={date}
-                            onChange={handleDateChange}
-                            views={['day', 'month']}
-                            disabled={selectedTask?.completed}
-                        />
-                    </LocalizationProvider>
-
-                    <Box
-                        sx={{
-                            display: "flex",
-                            gap: "0.5rem",
-                        }}
-                    >
+                    <Box sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "0.5rem",
+                        width: "100%",
+                        [theme.breakpoints.down("sm")]: {
+                            gap: "0.3rem"
+                        },
+                    }}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                                slotProps={{
+                                    textField: {
+                                        size: "small",
+                                        style: {
+                                            maxWidth: "9rem",
+                                            width: "100%"
+                                        },
+                                    }
+                                }}
+                                sx={{
+                                    alignItems: "flex-start",
+                                    display: "flex",
+                                    height: "100%",
+                                    flex: 1,
+                                }}
+                                value={date}
+                                onChange={handleDateChange}
+                                views={['day', 'month']}
+                                disabled={selectedTask?.completed}
+                                label="Date"
+                            />
+                        </LocalizationProvider>
 
                         <TextField
                             defaultValue="priority 1"
@@ -294,7 +323,11 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                             size="small"
                             select
                             sx={{
-                                flex: 2,
+                                flex: 1,
+                                maxWidth: "9rem",
+                                [theme.breakpoints.down("sm")]: {
+                                    maxWidth: "7rem"
+                                },
                                 '& .MuiSelect-icon': {
                                     display: 'none',
                                 },
@@ -329,6 +362,9 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                                 </MenuItem>
                             ))}
                         </TextField>
+                    </Box>
+
+                    <Box sx={{minWidth: "5rem", maxWidth: "5rem"}}>
                         <Button
                             fullWidth
                             size="small"
@@ -336,7 +372,8 @@ export const TaskCardEdit = (props: TaskCardEditProps) => {
                             sx={{
                                 flex: 1,
                                 height: "100%",
-                                lineHeight: 1
+                                lineHeight: 1,
+                                minHeight: "2.5rem"
                             }}
                             onClick={handleSaveTask}
                             disabled={selectedTask?.completed || nameError}

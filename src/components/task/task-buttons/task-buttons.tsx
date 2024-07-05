@@ -46,7 +46,7 @@ export const TaskButtons = (props: TaskButtonsProps) => {
     } = props;
 
     return (
-        <Box sx={{display: 'flex', flexDirection: 'row', pt: 2, justifyContent: "space-between"}}>
+        <Box sx={{display: 'flex', flexDirection: 'row', pt: 2, justifyContent: "space-between", width: "100%"}}>
             {currentStep > 0 && (
                 <Button
                     color="inherit"

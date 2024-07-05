@@ -57,7 +57,7 @@ export const RightSection = () => {
             left: 'auto',
             position: "relative",
             [theme.breakpoints.down('sm')]: {
-                width: "3.5rem"
+                maxWidth: "3rem"
             },
         }}>
             <Tabs
@@ -80,6 +80,7 @@ export const RightSection = () => {
                     },
                     "& .MuiTabs-flexContainer": {
                         height: "100%",
+                        width: "100%"
                     },
                     "& .MuiTab-root": {
                         justifyContent: 'center',

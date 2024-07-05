@@ -15,7 +15,10 @@ export const HomePage = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 width: "100%",
-                height: "100%"
+                height: "100%",
+                [theme.breakpoints.down('sm')]: {
+                    overflow: "hidden"
+                },
             }}>
                 <Box
                     component="img"

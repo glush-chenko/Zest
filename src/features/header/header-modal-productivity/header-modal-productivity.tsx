@@ -286,7 +286,7 @@ export const HeaderModalProductivity = () => {
                 outerRadius: 120,
                 cornerRadius: 14,
                 paddingAngle: 3,
-                cx: "70%",
+                cx: screenSizes.isSmall ? "87%" : "80%",
                 data: getPieChartData,
                 highlightScope: {highlighted: 'item', faded: 'global'},
             },
@@ -311,12 +311,15 @@ export const HeaderModalProductivity = () => {
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        gap: "1rem",
+                        gap: "0.5rem",
                         borderRadius: "1rem",
                         paddingBottom: "1rem",
                         backgroundColor: theme.palette.mode === "light" ? theme.palette.grey[300] : theme.palette.grey[900],
                         [theme.breakpoints.down('md')]: {
                             maxWidth: "40rem"
+                        },
+                        [theme.breakpoints.down('sm')]: {
+                            maxHeight: "none"
                         }
                     },
                 }}
@@ -337,7 +340,7 @@ export const HeaderModalProductivity = () => {
                         alignItems: "center",
                         backgroundColor: theme.palette.primary.main,
                         width: "100%",
-                        height: "4rem",
+                        maxHeight: "4rem",
                         color: theme.palette.primary.contrastText,
                         [theme.breakpoints.down('sm')]: {
                             fontSize: "large",
@@ -384,7 +387,7 @@ export const HeaderModalProductivity = () => {
                         }}
                     />
 
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{textAlign: "center"}}>
                         The goal for the day has been achieved: {completedTasksForDay}/{goalForDay} tasks
                     </Typography>
 
@@ -413,7 +416,7 @@ export const HeaderModalProductivity = () => {
                             padding: "0 4rem"
                         },
                         [theme.breakpoints.down('sm')]: {
-                            // maxHeight: "25rem",
+                            maxHeight: "20rem",
                             padding: "0.5rem"
                         }
                     }}
@@ -464,14 +467,13 @@ export const HeaderModalProductivity = () => {
                         sx={{
                             display: "flex",
                             flexDirection: "column",
-                            // alignItems: "center",
                             gap: "0.5rem",
                             width: "100%",
                             backgroundColor: theme.palette.mode === "light" ? theme.palette.common.white : theme.palette.grey[600],
                             borderRadius: "2rem",
                             padding: "1rem",
                             flex: 1,
-                            minWidth: "20rem",
+                            // minWidth: "20rem",
                             [theme.breakpoints.down('md')]: {
                                 maxWidth: "30rem",
                             },
@@ -486,8 +488,9 @@ export const HeaderModalProductivity = () => {
                         <Box
                             sx={{
                                 display: "flex",
-                                gap: "1rem",
-                                justifyContent: "center"
+                                gap: "0.3rem",
+                                justifyContent: "center",
+                                alignItems: "center",
                             }}
                         >
                             <HeaderModalSectionProductivity

@@ -16,6 +16,9 @@ export const OpenIconSpeedDial = () => {
                 position: "absolute",
                 bottom: theme.spacing(7),
                 right: theme.spacing(13),
+                [theme.breakpoints.down('sm')]: {
+                    right: "5rem"
+                },
             }}
         >
             <NavLink

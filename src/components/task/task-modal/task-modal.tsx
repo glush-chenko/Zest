@@ -170,7 +170,7 @@ export const TaskModal = () => {
                     },
                     [theme.breakpoints.down('sm')]: {
                         gap: "0.5rem",
-                        padding: "0 1rem"
+                        padding: "0 0.5rem"
                     },
                 }}
             >

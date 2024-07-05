@@ -38,8 +38,13 @@ export const Content = () => {
             backgroundColor: theme.palette.background.default,
             flex: 1,
             padding: "1rem 4rem",
+            [theme.breakpoints.down('md')]: {
+                padding: "1rem",
+                overflow: "hidden",
+            },
             [theme.breakpoints.down('sm')]: {
-                padding: "0.5rem 1rem",
+                padding: 0,
+                overflow: "hidden",
             },
         }}>
             <Outlet/>

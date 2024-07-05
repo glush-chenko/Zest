@@ -9,7 +9,7 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import {ClickAwayListener, FormControlLabel, useTheme} from "@mui/material";
+import {ClickAwayListener, FormControlLabel, useMediaQuery, useTheme} from "@mui/material";
 import {ThemeSwitch} from "../../../components/styled/theme-switch";
 import logo from "../../../assets/zest-logo.png"
 import logo2 from "../../../assets/zest-logo2.png"
@@ -27,6 +27,8 @@ import {selectTodoistCompletedTasks} from "../../../api/todoist-api";
 import dayjs from "dayjs";
 import MenuIcon from '@mui/icons-material/Menu';
 import {selectToken} from "../../../pages/login/login-slice";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {selectScreenSizes} from "../../screen-slice";
 
 enum SETTINGS {
     PROFILE = 'Profile',
@@ -51,10 +53,12 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
     const completedTasksAPI = useAppSelector(selectTodoistCompletedTasks);
     const {selectedDate} = useAppSelector(selectRightSection);
     const {avatarSrc, goalForDay} = useAppSelector(selectHeader);
-    const token = useAppSelector(selectToken)
+    const token = useAppSelector(selectToken);
+    const screenSizes = useAppSelector(selectScreenSizes);
 
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const [anchorElPage, setAnchorElPage] = React.useState<null | HTMLElement>(null);
+    const [searchToggle, setSearchToggle] = React.useState(false);
 
     const completedTasksForDay = useMemo(() => {
         if (token) {
@@ -102,6 +106,10 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
         dispatch(toggleTheme());
     }, [dispatch]);
 
+    const handleBackToNav = useCallback(() => {
+        setSearchToggle(true);
+    }, [])
+
     return (
         <AppBar
             position="static"
@@ -138,53 +146,70 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
                     >
                     </Box>
 
-                    <Box sx={{flexGrow: 0}}>
-                        <Tooltip title="Open pages">
-                            <IconButton
-                                size="large"
-                                color="inherit"
-                                aria-label="open page"
-                                sx={{display: {xs: 'flex', md: 'none'}}}
-                                onClick={handleOpenPageMenu}
-                            >
-                                <MenuIcon/>
-                            </IconButton>
-                        </Tooltip>
-
-                        <Menu
-                            sx={{mt: '3rem', display: {xs: 'flex', md: 'none'}}}
-                            anchorEl={anchorElPage}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'center',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'center',
-                            }}
-                            open={Boolean(anchorElPage)}
-                            onClose={handleClosePageMenu}
-                        >
-                            {PAGES.map((page) => (
-                                <NavLink
-                                    to={page === 'Home' ? '/' : `/${page.toLowerCase()}`}
-                                    style={{
-                                        textDecoration: 'none',
-                                        color: 'inherit'
-                                    }}
-                                    key={`navigation-link-${page}`}
+                    {searchToggle && (
+                        <Box sx={{flexGrow: 0}}>
+                            <Tooltip title="Open pages">
+                                <IconButton
+                                    size="large"
+                                    color="inherit"
+                                    aria-label="open page"
+                                    sx={{display: {xs: 'flex', md: 'none'}}}
+                                    onClick={handleOpenPageMenu}
                                 >
-                                    <MenuItem
+                                    <MenuIcon sx={{
+                                        [theme.breakpoints.down('sm')]: {
+                                            fontSize: "1.3rem"
+                                        }
+                                    }}/>
+                                </IconButton>
+                            </Tooltip>
+
+                            <Menu
+                                sx={{mt: '3rem', display: {xs: 'flex', md: 'none'}}}
+                                anchorEl={anchorElPage}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'center',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'center',
+                                }}
+                                open={Boolean(anchorElPage)}
+                                onClose={handleClosePageMenu}
+                            >
+                                {PAGES.map((page) => (
+                                    <NavLink
+                                        to={page === 'Home' ? '/' : `/${page.toLowerCase()}`}
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: 'inherit'
+                                        }}
                                         key={`navigation-link-${page}`}
-                                        onClick={handleClosePageMenu}
                                     >
-                                        <Typography textAlign="center">{page}</Typography>
-                                    </MenuItem>
-                                </NavLink>
-                            ))}
-                        </Menu>
-                    </Box>
+                                        <MenuItem
+                                            key={`navigation-link-${page}`}
+                                            onClick={handleClosePageMenu}
+                                        >
+                                            <Typography textAlign="center">{page}</Typography>
+                                        </MenuItem>
+                                    </NavLink>
+                                ))}
+                            </Menu>
+                        </Box>
+                    )}
+
+                    {(!searchToggle && screenSizes.isMedium) && (
+                        <IconButton onClick={handleBackToNav}>
+                            <ArrowBackIcon sx={{
+                                [theme.breakpoints.down('sm')]: {
+                                    fontSize: "1.3rem"
+                                },
+                                color: theme.palette.primary.contrastText
+                            }}/>
+                        </IconButton>
+                    )}
 
                     <Box sx={{flexGrow: 1, display: {xs: 'none', md: 'flex'}}}>
                         {PAGES.map((page) => (
@@ -215,99 +240,116 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
                         ))}
                     </Box>
 
-                    <Box
-                        sx={{
-                            display: {xs: 'flex', md: 'none'},
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexGrow: 1,
-                            [theme.breakpoints.down('sm')]: {
-                                justifyContent: "flex-start",
-                                marginLeft: "1rem"
-                            },
-                        }}
-                    >
-                        <Typography
-                            variant="h5"
-                            noWrap
-                            component="a"
-                            href="/"
+                    {searchToggle && (
+                        <Box
                             sx={{
-                                fontWeight: 700,
-                                letterSpacing: '.3rem',
-                                color: 'inherit',
-                                textDecoration: 'none',
+                                display: {xs: 'flex', md: 'none'},
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexGrow: 1,
+                                [theme.breakpoints.down('sm')]: {
+                                    justifyContent: "flex-start",
+                                    marginLeft: "1rem"
+                                },
                             }}
                         >
-                            Zest
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{display: "flex", gap: "1rem"}}>
-                        <HeaderSearch/>
-
-                        <FormControlLabel
-                            control={
-                                <ThemeSwitch
-                                    checked={theme.palette.mode === 'dark'}
-                                    onChange={handleChangeTheme}
-                                    name="theme-toggle"
-                                    color="primary"
-                                />
-                            }
-                            aria-label={theme.palette.mode === 'dark' ? 'Dark Theme' : 'Light Theme'}
-                            label=""
-                            sx={{margin: 0}}
-                        />
-
-                        <Box sx={{flexGrow: 0}}>
-                            <Tooltip title="Open settings">
-                                {isLoggedIn ? (
-                                    <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                        <Avatar src={avatarSrc} alt="avatar image"/>
-                                    </IconButton>
-                                ) : (
-                                    <Skeleton variant="circular" width={40} height={40}/>
-                                )}
-                            </Tooltip>
-
-                            <Menu
-                                sx={{mt: '3rem'}}
-                                anchorEl={anchorElUser}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
+                            <Typography
+                                variant="h5"
+                                noWrap
+                                component="a"
+                                href="/"
+                                sx={{
+                                    fontWeight: 700,
+                                    letterSpacing: '.3rem',
+                                    color: 'inherit',
+                                    textDecoration: 'none',
                                 }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={Boolean(anchorElUser)}
-                                onClose={handleCloseUserMenu}
                             >
-                                {SETTINGS_MENU_ITEMS.map((setting, index) => (
-                                    <NavLink
-                                        state={{
-                                            previousRoute: location.pathname,
-                                        }}
-                                        to={`/${setting.toLowerCase()}`}
-                                        style={{
-                                            textDecoration: 'none',
-                                            color: 'inherit'
-                                        }}
-                                        key={`navigation-link-${setting}`}
-                                    >
-                                        <MenuItem
-                                            key={index}
-                                            onClick={handleCloseUserMenu}
-                                        >
-                                            <Typography textAlign="center">{setting}</Typography>
-                                        </MenuItem>
-                                    </NavLink>
-                                ))}
-                            </Menu>
+                                Zest
+                            </Typography>
                         </Box>
+                    )}
+
+                    <Box
+                        sx={{
+                            display: "flex",
+                            gap: "1rem",
+                            width: !searchToggle ? "100%" : "none",
+                            justifyContent: "flex-end"
+                        }}
+                    >
+                        <HeaderSearch searchToggle={searchToggle} setSearchToggle={setSearchToggle}/>
+
+                        {(!searchToggle && !screenSizes.isSmall) && (
+                            <FormControlLabel
+                                control={
+                                    <ThemeSwitch
+                                        checked={theme.palette.mode === 'dark'}
+                                        onChange={handleChangeTheme}
+                                        name="theme-toggle"
+                                        color="primary"
+                                    />
+                                }
+                                aria-label={theme.palette.mode === 'dark' ? 'Dark Theme' : 'Light Theme'}
+                                label=""
+                                sx={{margin: 0, maxWidth: "2.7rem", justifyContent: "center"}}
+                            />
+                        )}
+
+                        {(!searchToggle && !screenSizes.isSmall) && (
+                            <Box sx={{flexGrow: 0}}>
+                                <Tooltip title="Open settings">
+                                    {isLoggedIn ? (
+                                        <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
+                                            <Avatar src={avatarSrc} alt="avatar image" sx={{
+                                                [theme.breakpoints.down('sm')]: {
+                                                    maxWidth: "2.2rem"
+                                                },
+                                            }}/>
+                                        </IconButton>
+                                    ) : (
+                                        <Skeleton variant="circular" width={40} height={40}/>
+                                    )}
+                                </Tooltip>
+
+                                <Menu
+                                    sx={{mt: '3rem'}}
+                                    anchorEl={anchorElUser}
+                                    anchorOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    open={Boolean(anchorElUser)}
+                                    onClose={handleCloseUserMenu}
+                                >
+                                    {SETTINGS_MENU_ITEMS.map((setting, index) => (
+                                        <NavLink
+                                            state={{
+                                                previousRoute: location.pathname,
+                                            }}
+                                            to={`/${setting.toLowerCase()}`}
+                                            style={{
+                                                textDecoration: 'none',
+                                                color: 'inherit'
+                                            }}
+                                            key={`navigation-link-${setting}`}
+                                        >
+                                            <MenuItem
+                                                key={index}
+                                                onClick={handleCloseUserMenu}
+                                            >
+                                                <Typography textAlign="center">{setting}</Typography>
+                                            </MenuItem>
+                                        </NavLink>
+                                    ))}
+                                </Menu>
+                            </Box>
+                        )}
                     </Box>
                 </Toolbar>
             </Container>

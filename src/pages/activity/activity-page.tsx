@@ -83,7 +83,7 @@ export const ActivityPage = () => {
         const groupByDate = (priority: string) => {
             return selectedTasks.filter(task => task.priority === priority)
                 .reduce((dateGroups, task) => {
-                    const date = formatDate(task.createdAt ? task.createdAt : null);
+                    const date = formatDate(task.completedAt ? task.completedAt : task.createdAt);
                     if (!dateGroups[date]) {
                         dateGroups[date] = [];
                     }
@@ -99,7 +99,7 @@ export const ActivityPage = () => {
     }, [selectedTasks])
 
     const groupsByDate = useMemo(() => {
-        return sortByDate(selectedTasks).reduce((groups, task) => {
+        return sortByDate(selectedTasks).reverse().reduce((groups, task) => {
             const date = formatDate(task.completedAt ? task.completedAt : task.createdAt);
             if (!groups[date]) {
                 groups[date] = [];

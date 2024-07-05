@@ -22,6 +22,7 @@ import {PRIORITY} from "../task-card-edit/task-card-edit";
 import {closeTask, deleteTaskSync} from "../../../../api/todoist-api";
 import {useNavigate} from "react-router-dom";
 import {selectToken} from "../../../../pages/login/login-slice";
+import {Loading} from "../../../generic/loading";
 
 export interface TaskCardProps {
     /**
@@ -41,7 +42,6 @@ export const TaskCard = (props: TaskCardProps) => {
 
     const [expanded, setExpanded] = React.useState(false);
     const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-    const [isHovered, setIsHovered] = React.useState(false);
 
     const handleExpandTask = useCallback(() => {
         setExpanded((prev) => !prev);
@@ -106,31 +106,50 @@ export const TaskCard = (props: TaskCardProps) => {
                             <Box sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "0.3rem"
+                                gap: "0.3rem",
                             }}>
-                                    <IconButton
-                                        onClick={() => handleCompleteTask(task.id)}
+                                <IconButton
+                                    onClick={() => handleCompleteTask(task.id)}
+                                    sx={{
+                                        '&:hover': {
+                                            backgroundColor: "transparent"
+                                        },
+                                        padding: 0
+                                    }}
+                                >
+                                    <Box
                                         sx={{
-                                            '&:hover': {
-                                                backgroundColor: "transparent"
+                                            display: "flex",
+                                            alignItems: "center",
+                                            "& .MuiCardHeader-content": {
+                                                overflowWrap: "anywhere"
                                             },
-                                            padding: 0
+                                            "& .check-circle": {
+                                                display: "none",
+                                            },
+                                            "& .unchecked-radio": {
+                                                display: "flex",
+                                            },
+                                            "&:hover": {
+                                                "& .check-circle": {
+                                                    display: "flex",
+                                                },
+                                                "& .unchecked-radio": {
+                                                    display: "none",
+                                                },
+                                            },
                                         }}
                                     >
-                                        <Box
-                                            sx={{
-                                                display: "flex",
-                                                alignItems: "center"
-                                            }}
-                                            onMouseEnter={() => setIsHovered(true)}
-                                            onMouseLeave={() => setIsHovered(false)}
-                                        >
-                                            {isHovered ?
-                                                <CheckCircleOutlineIcon sx={{fontSize: "1.4rem", color: `${getPriorityLabel}`}}/> :
-                                                <RadioButtonUncheckedIcon sx={{fontSize: "1.4rem", color: `${getPriorityLabel}`}}/>}
-                                        </Box>
-                                    </IconButton>
-
+                                        <CheckCircleOutlineIcon
+                                            className="check-circle"
+                                            sx={{fontSize: "1.4rem", color: getPriorityLabel}}
+                                        />
+                                        <RadioButtonUncheckedIcon
+                                            className="unchecked-radio"
+                                            sx={{fontSize: "1.4rem", color: getPriorityLabel}}
+                                        />
+                                    </Box>
+                                </IconButton>
 
                                 <Typography
                                     variant="subtitle1"
@@ -140,17 +159,22 @@ export const TaskCard = (props: TaskCardProps) => {
                                         "&:hover": {
                                             cursor: "pointer"
                                         },
+                                        lineHeight: 1.5,
                                         textDecoration: task.completed ? 'line-through' : "none",
-                                        // '& .MuiTypography-root .MuiTypography-subtitle1': {
-                                        //     textDecoration: task.completed ? 'line-through' : "none",
-                                        // },
+                                        wordBreak: "break-word",
+                                        whiteSpace: "pre-wrap",
+                                        textOverflow: "ellipsis",
+                                        display: "-webkit-box",
+                                        overflow: "hidden",
+                                        WebkitLineClamp: '4',
+                                        WebkitBoxOrient: 'vertical'
                                     }}
                                 >
                                     {task.name}
                                 </Typography>
                             </Box>
 
-                            <Box>
+                            <Box sx={{display: "flex"}}>
                                 <Tooltip title="Edit task" placement="top" arrow>
                                     <IconButton
                                         aria-label="settings"
@@ -204,8 +228,11 @@ export const TaskCard = (props: TaskCardProps) => {
                         {task.description && (
                             <Typography
                                 variant="body2"
-                                sx={{color: theme.palette.grey[500]}}
                                 gutterBottom
+                                sx={{
+                                    color: theme.palette.grey[500],
+                                    wordBreak: "break-word",
+                                }}
                             >
                                 {task.description}
                             </Typography>
@@ -213,14 +240,14 @@ export const TaskCard = (props: TaskCardProps) => {
                     </CardContent>
                 </Collapse>
             </Card>
-            <Divider />
+            <Divider/>
 
             {openAlertDialog && (
                 <AlertDialog
                     title="Deleting a task"
                     text={`Are you sure you want to delete ${task.name}?`}
                     onCancel={handleCancelTask}
-                    onSuccess={() => handleDeleteTask(task.id)} />
+                    onSuccess={() => handleDeleteTask(task.id)}/>
             )}
         </>
     );

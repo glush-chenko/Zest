@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React, {useCallback, useMemo} from "react";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -8,13 +8,10 @@ import {useAppDispatch, useAppSelector} from "../../../../app/hooks";
 import {selectDrawerOpen} from "../left-section-slice";
 import {SvgIconComponent} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
-import {useTheme} from "@mui/material";
 import List from "@mui/material/List";
 import Box from "@mui/material/Box";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
+import {PRIORITY} from "../../../../components/task/task-cards-list/task-card-edit/task-card-edit";
 
 interface LeftSectionListItemProps {
     task: Task;
@@ -25,10 +22,8 @@ interface LeftSectionListItemProps {
 export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const theme = useTheme();
     const {task, icon: Icon, done} = props;
     const drawer = useAppSelector(selectDrawerOpen);
-    const [isHovered, setIsHovered] = React.useState(false);
 
 
     const handleTaskClick = useCallback((taskId: string) => {
@@ -37,6 +32,11 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
             navigate(`/tasks/${taskId}`);
         }
     }, [dispatch, navigate])
+
+    const getPriorityLabel = useMemo(() => {
+        const priorityItem = PRIORITY.find(item => item.value === task.priority);
+        return priorityItem ? priorityItem.label : "";
+    }, [PRIORITY, task]);
 
     return (
         <List sx={{padding: 0}}>
@@ -82,7 +82,7 @@ export const LeftSectionListItem = (props: LeftSectionListItemProps) => {
                             <Icon
                                 className="completed-icon"
                                 sx={{
-                                    color: done ? theme.palette.success.light : theme.palette.primary.light,
+                                    color: `${getPriorityLabel}`,
                                     fontSize: "1.5rem"
                                 }}
                             />

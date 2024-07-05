@@ -20,7 +20,8 @@ interface LeftSectionProps {
     isLoggedIn: boolean
 }
 
-export const LeftSection: React.FC<LeftSectionProps> = ({isLoggedIn}) => {
+export const LeftSection = (props: LeftSectionProps) => {
+    const {isLoggedIn} = props;
     const dispatch = useAppDispatch();
     const theme = useTheme();
 
@@ -49,80 +50,82 @@ export const LeftSection: React.FC<LeftSectionProps> = ({isLoggedIn}) => {
     }, [toggleDrawer, dispatch]);
 
     return (
-        <Drawer
-            variant="permanent"
-            open={drawer}
-            anchor="left"
-            sx={{
-                '& .MuiDrawer-paper': {
-                    backgroundColor: theme.palette.mode === "light" ? theme.palette.grey[100] : theme.palette.grey[900],
-                    border: "none"
-                },
-            }}
-        >
-            <Toolbar/>
-            <Box
+        !screenSizes.isSmall ? (
+            <Drawer
+                variant="permanent"
+                open={drawer}
+                anchor="left"
                 sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    overflow: "hidden",
+                    '& .MuiDrawer-paper': {
+                        backgroundColor: theme.palette.mode === "light" ? theme.palette.grey[100] : theme.palette.grey[900],
+                        border: "none"
+                    },
                 }}
             >
+                <Toolbar/>
                 <Box
                     sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: theme.palette.mode === "light" ? theme.palette.primary.main : theme.palette.grey[900],
-                        color: theme.palette.common.white,
-                        minHeight: "3.5rem",
-                        padding: theme.spacing(0, 1),
-                        ...theme.mixins.toolbar,
+                        display: "flex",
+                        flexDirection: "column",
+                        overflow: "hidden",
                     }}
                 >
-                    {drawer && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                flexGrow: 1,
-                                justifyContent: "center"
-                            }}
-                        >
-                            <Typography variant="subtitle1">All Tasks</Typography>
-                        </Box>
-                    )}
-                    <IconButton
-                        onClick={drawer ? handleDrawerClose : handleDrawerOpen}
-                        color="inherit"
-                        aria-label="button chevron"
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: theme.palette.mode === "light" ? theme.palette.primary.main : theme.palette.grey[900],
+                            color: theme.palette.common.white,
+                            minHeight: "3.5rem",
+                            padding: theme.spacing(0, 1),
+                            ...theme.mixins.toolbar,
+                        }}
                     >
-                        {drawer ? (
-                            <ChevronLeftIcon sx={{fontSize: "1.3rem"}}/>
-                        ) : (
-                            <ChevronRightIcon sx={{fontSize: "1.3rem"}}/>
+                        {drawer && (
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexGrow: 1,
+                                    justifyContent: "center"
+                                }}
+                            >
+                                <Typography variant="subtitle1">All Tasks</Typography>
+                            </Box>
                         )}
-                    </IconButton>
-                </Box>
+                        <IconButton
+                            onClick={drawer ? handleDrawerClose : handleDrawerOpen}
+                            color="inherit"
+                            aria-label="button chevron"
+                        >
+                            {drawer ? (
+                                <ChevronLeftIcon sx={{fontSize: "1.3rem"}}/>
+                            ) : (
+                                <ChevronRightIcon sx={{fontSize: "1.3rem"}}/>
+                            )}
+                        </IconButton>
+                    </Box>
 
-                <Box
-                    sx={{
-                        overflow: "auto",
-                        width: "100%",
-                    }}
-                >
-                    <TasksSection
-                        active={true}
-                        tasks={token ? activeTasksAPI : activeTasks}
-                        isLoggedIn={isLoggedIn}
-                    />
-                    {(drawer || activeTasksAPI.length > 0) && <Divider/>}
-                    <TasksSection
-                        active={false}
-                        tasks={token ? completedTasksAPI : completedTasks}
-                        isLoggedIn={isLoggedIn}
-                    />
+                    <Box
+                        sx={{
+                            overflow: "auto",
+                            width: "100%",
+                        }}
+                    >
+                        <TasksSection
+                            active={true}
+                            tasks={token ? activeTasksAPI : activeTasks}
+                            isLoggedIn={isLoggedIn}
+                        />
+                        {(drawer || activeTasksAPI.length > 0) && <Divider/>}
+                        <TasksSection
+                            active={false}
+                            tasks={token ? completedTasksAPI : completedTasks}
+                            isLoggedIn={isLoggedIn}
+                        />
+                    </Box>
                 </Box>
-            </Box>
-        </Drawer>
+            </Drawer>
+        ) : null
     );
 }

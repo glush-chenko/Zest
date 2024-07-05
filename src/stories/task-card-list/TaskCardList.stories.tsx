@@ -43,9 +43,6 @@ const Mockstore: React.FC<MockstoreProps> = ({taskState, children}) => (
                             const taskIndex = state.tasks.findIndex((task) => task.id === action.payload);
                             if (taskIndex !== -1) {
                                 state.tasks[taskIndex].completed = true;
-                                // state.tasks[taskIndex].completedAt = Date.now();
-                                // localStorage.setItem('tasks', JSON.stringify(state.tasks));
-                                //оставить ли эти строки?
                             }
                         },
                         setEditingTaskId: (state, action: PayloadAction<string | null>) => {
@@ -53,7 +50,6 @@ const Mockstore: React.FC<MockstoreProps> = ({taskState, children}) => (
                         },
                         removeTask: (state, action: PayloadAction<string>) => {
                             state.tasks = state.tasks.filter((task) => task.id !== action.payload);
-                            // localStorage.setItem('tasks', JSON.stringify(state.tasks));
                         },
                     },
                 }).reducer,

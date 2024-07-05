@@ -6,6 +6,7 @@ import Stepper from "@mui/material/Stepper";
 import {isStepOptional} from "../../../utils/is-step-optional";
 import {useAppSelector} from "../../../app/hooks";
 import {selectScreenSizes} from "../../../features/screen-slice";
+import {useTheme} from "@mui/material";
 
 interface TaskStep {
     /**
@@ -36,6 +37,8 @@ interface TaskStepperProps {
 
 export const TaskStepper = (props: TaskStepperProps) => {
     const {steps, currentStep} = props;
+    const theme = useTheme();
+
     const screenSizes = useAppSelector(selectScreenSizes);
 
     return (
@@ -43,7 +46,10 @@ export const TaskStepper = (props: TaskStepperProps) => {
             orientation={screenSizes.isSmall ? "horizontal" : "vertical"}
             activeStep={currentStep}
             sx={{
-                paddingTop: "2.5rem"
+                paddingTop: "2.5rem",
+                [theme.breakpoints.down('sm')]: {
+                    paddingTop: "1.5rem"
+                },
             }}
         >
             {steps.map((step, index) => {
@@ -59,7 +65,13 @@ export const TaskStepper = (props: TaskStepperProps) => {
                     <Step key={step.name} completed={step.completed}>
                         <StepLabel
                             {...labelProps}
-                            sx={{maxWidth: screenSizes.isSmall ? "8rem" : "none"}}
+                            sx={{
+                                maxWidth: screenSizes.isSmall ? "8rem" : "none",
+                                [theme.breakpoints.down('sm')]: {
+                                    flexDirection: "column",
+                                    gap: "0.5rem"
+                                },
+                            }}
                         >
                             {step.name}
                         </StepLabel>

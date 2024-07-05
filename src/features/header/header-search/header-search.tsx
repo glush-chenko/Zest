@@ -3,7 +3,7 @@ import {alpha, styled} from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import {useNavigate, createSearchParams, Form} from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
-import {Autocomplete, FilterOptionsState, useTheme} from "@mui/material";
+import {Autocomplete, FilterOptionsState, useMediaQuery, useTheme} from "@mui/material";
 import {selectTasks, Task} from "../../../components/task/task-slice";
 import {useAppSelector} from "../../../app/hooks";
 import TextField from "@mui/material/TextField";
@@ -16,12 +16,14 @@ const Search = styled('div')(({theme}) => ({
     display: 'flex',
     position: 'relative',
     borderRadius: "2rem",
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    backgroundColor: useMediaQuery(theme.breakpoints.up('md')) ? alpha(theme.palette.common.white, 0.15) : "none",
     '&:hover': {
-        backgroundColor: alpha(theme.palette.common.white, 0.25),
+        backgroundColor: alpha(theme.palette.common.white, 0.10),
+        transition: 'background-color 0.3s ease',
     },
     marginLeft: 0,
     width: '100%',
+    transition: 'width 0.3s ease, margin-left 0.3s ease',
     [theme.breakpoints.up('md')]: {
         marginLeft: theme.spacing(1),
         width: 'auto',
@@ -45,28 +47,25 @@ const StyledAutocomplete = styled(Autocomplete<Task>)(({theme}) => ({
         '& .MuiInputBase-input': {
             transition: theme.transitions.create('width'),
             [theme.breakpoints.up('md')]: {
-                width: '10ch',
+                width: '15ch',
                 '&:focus': {
-                    width: '15ch',
+                    width: '20ch',
                 },
             },
             [theme.breakpoints.down('md')]: {
-                width: '5ch',
-                '&:focus': {
-                    width: '15ch',
-                },
-            },
-            [theme.breakpoints.down('sm')]: {
-                width: 0,
-                '&:focus': {
-                    width: '5ch',
-                },
+                width: "100%"
             },
         },
     },
 }));
 
-export const HeaderSearch = () => {
+interface HeaderSearchProps {
+    searchToggle: boolean,
+    setSearchToggle: (value: any) => void
+}
+
+export const HeaderSearch = (props: HeaderSearchProps) => {
+    const {searchToggle, setSearchToggle} = props;
     const theme = useTheme();
     const navigate = useNavigate();
     const autocompleteRef = useRef<HTMLDivElement | null>(null);
@@ -81,7 +80,6 @@ export const HeaderSearch = () => {
     const [currentSearchQuery, setCurrentSearchQuery] = React.useState('');
     const [currentTask, setCurrentTask] = React.useState<Task | null>(null);
     const [showOptions, setShowOptions] = React.useState(false);
-    const [searchToggle, setSearchToggle] = React.useState(false);
 
     useEffect(() => {
         if (screenSizes.isMedium) {
@@ -122,70 +120,65 @@ export const HeaderSearch = () => {
     };
 
     const handleSearchToggle = useCallback(() => {
-        setSearchToggle((prevState) => !prevState);
+        setSearchToggle((prevState: boolean) => !prevState);
     }, []);
-
-    const handleAutocompleteBlur = useCallback(() => {
-        if (screenSizes.isMedium) {
-            if (!autocompleteRef.current?.contains(document.activeElement)) {
-                setSearchToggle(true);
-            }
-        }
-    }, [autocompleteRef, screenSizes]);
 
     return (
         <>
             {searchToggle ? (
                 <Fade in={searchToggle} timeout={350}>
                     <IconButton type="submit" aria-label="search" sx={{cursor: 'pointer'}} onClick={handleSearchToggle}>
-                        <SearchIcon sx={{color: theme.palette.primary.contrastText}}/>
+                        <SearchIcon sx={{
+                            [theme.breakpoints.down('sm')]: {
+                                fontSize: "1.3rem"
+                            },
+                            color: theme.palette.primary.contrastText
+                        }}/>
                     </IconButton>
                 </Fade>
             ) : (
-                // <Collapse in={!searchToggle} timeout={350} collapsedSize={40} orientation="horizontal">
-                    <Search>
-                        <SearchIconWrapper>
-                            <IconButton type="submit" aria-label="search" sx={{cursor: "pointer"}}
-                                        onClick={onSearchHandler}>
-                                <SearchIcon sx={{color: theme.palette.primary.contrastText}}/>
-                            </IconButton>
-                        </SearchIconWrapper>
+                <Search>
+                    <SearchIconWrapper>
+                        <IconButton type="submit" aria-label="search" sx={{cursor: "pointer"}}
+                                    onClick={onSearchHandler}>
+                            <SearchIcon sx={{color: theme.palette.primary.contrastText}}/>
+                        </IconButton>
+                    </SearchIconWrapper>
 
-                        <Form onSubmit={onSearchHandler}>
-                            <StyledAutocomplete
-                                ref={autocompleteRef}
-                                onBlur={handleAutocompleteBlur}
-                                value={currentTask}
-                                onChange={(event: any, newValue: Task | null) => {
-                                    setCurrentTask(newValue);
-                                    setCurrentSearchQuery(newValue?.name ?? "");
-                                    if (newValue) {
-                                        onAutoComplete(newValue)
-                                    }
-                                }}
-                                onInputChange={(_, newInputValue, reason) => {
-                                    setCurrentSearchQuery(newInputValue);
-                                }}
-                                options={token ? tasksAPI : tasks}
-                                filterOptions={filterOptions}
-                                getOptionLabel={(option: Task) => option.name}
-                                open={!!currentSearchQuery && showOptions}
-                                onOpen={() => {
-                                    setShowOptions(true);
-                                }}
-                                clearOnBlur={false}
-                                clearOnEscape
-                                onClose={() => {
-                                    setShowOptions(false);
-                                }}
-                                autoComplete
-                                renderInput={(params) => (
-                                    <TextField {...params} autoFocus aria-label="search-panel"/>
-                                )}
-                            />
-                        </Form>
-                    </Search>
-                // </Collapse>
+                    <Form onSubmit={onSearchHandler} style={{width: "100%"}}>
+                        <StyledAutocomplete
+                            ref={autocompleteRef}
+                            value={currentTask}
+                            onChange={(event: any, newValue: Task | null) => {
+                                setCurrentTask(newValue);
+                                setCurrentSearchQuery(newValue?.name ?? "");
+                                if (newValue) {
+                                    onAutoComplete(newValue)
+                                }
+                            }}
+                            onInputChange={(_, newInputValue, reason) => {
+                                setCurrentSearchQuery(newInputValue);
+                            }}
+                            options={token ? tasksAPI : tasks}
+                            filterOptions={filterOptions}
+                            getOptionLabel={(option: Task) => option.name}
+                            getOptionKey={(option: Task) => option.id}
+                            open={!!currentSearchQuery && showOptions}
+                            onOpen={() => {
+                                setShowOptions(true);
+                            }}
+                            clearOnBlur={false}
+                            clearOnEscape
+                            onClose={() => {
+                                setShowOptions(false);
+                            }}
+                            autoComplete
+                            renderInput={(params) => (
+                                <TextField {...params} autoFocus aria-label="search-panel"/>
+                            )}
+                        />
+                    </Form>
+                </Search>
             )}
         </>
     )

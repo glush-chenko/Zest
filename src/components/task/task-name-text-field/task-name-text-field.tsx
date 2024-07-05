@@ -109,18 +109,26 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                     },
                                 }}
                             >
-                                <Typography variant="subtitle1" gutterBottom>{name}</Typography>
+                                <Typography
+                                    variant="subtitle1"
+                                    gutterBottom
+                                    sx={{overflow: "hidden"}}
+                                >
+                                    {name}
+                                </Typography>
                             </CardContent>
                         </Card>
 
                         <TextField
                             label="Description"
                             multiline
-                            // rows={2}
                             sx={{maxWidth: "20rem", width: "100%"}}
                             value={description}
                             variant="standard"
                             onChange={(e) => onDescriptionChange(e.target.value)}
+                            inputProps={{
+                                maxLength: 100,
+                            }}
                         />
                     </Box>
                 )}
@@ -133,24 +141,40 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                             justifyContent: "center",
                             alignItems: "center",
                             gap: "1rem",
+                            overflow: "hidden"
                         }}
                     >
                         <Typography
                             variant="subtitle1"
+                            sx={{
+                                wordBreak: "break-word",
+                                whiteSpace: "pre-wrap",
+                                textOverflow: "ellipsis",
+                                display: "-webkit-box",
+                                overflow: "hidden",
+                                WebkitLineClamp: '2',
+                                WebkitBoxOrient: 'vertical'
+                            }}
                         >
                             {name}
                         </Typography>
                         <Box sx={{border: "1px solid gray", width: "100%"}}/>
-                        {description && <Typography variant="body1" gutterBottom>{description}</Typography>}
+                        {description && (
+                            <Typography
+                                variant="body1"
+                                gutterBottom
+                                sx={{wordBreak: "break-word"}}
+                            >
+                                {description}
+                            </Typography>
+                        )}
 
                         <Box
+                            // flexDirection={{xs: 'column', md: 'row'}}
                             sx={{
                                 display: "flex",
                                 gap: "1rem",
                                 alignItems: "center",
-                                // [theme.breakpoints.down('sm')]: {
-                                //     maxWidth: "10rem"
-                                // },
                             }}
                         >
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -160,7 +184,15 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                     onChange={onDateChange}
                                     views={['day', 'month']}
                                     sx={{
-                                        flex: 1,
+                                        flex: 1.2,
+                                        height: "100%",
+                                        "& .MuiInputBase-input": {
+                                            padding: "0.7rem",
+                                            height: "100%"
+                                        },
+                                        "& .MuiInputBase-root": {
+                                            height: "100%"
+                                        }
                                     }}
                                 />
                             </LocalizationProvider>
@@ -175,6 +207,10 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                     '& .MuiSelect-icon': {
                                         display: 'none',
                                     },
+                                    "& .MuiSelect-select.MuiSelect-outlined": {
+                                        padding: "0.6rem",
+                                        height: 0
+                                    }
                                 }}
                                 onChange={(e) => onPriorityChange(e.target.value)}
                                 label="Priority"
@@ -191,7 +227,7 @@ export const TaskNameTextField = (props: TaskNameTextFieldProps) => {
                                             sx={{
                                                 display: "flex",
                                                 gap: "0.5rem",
-                                                width: "2rem"
+                                                minWidth: "2.2rem"
                                             }}
                                         >
                                             <FlagIcon sx={{fontSize: "1.3rem", color: `${option.label}`}}/>

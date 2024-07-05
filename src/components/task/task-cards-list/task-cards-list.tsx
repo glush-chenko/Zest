@@ -49,8 +49,9 @@ export const TaskCardsList = () => {
                 display: 'flex',
                 flexDirection: "column",
                 gap: "1rem",
-                padding: "1rem 0",
-                height: "100%"
+                padding: "1rem",
+                height: "100%",
+                overflow: "auto"
             }}>
                 <Typography
                     variant="h6"
@@ -58,7 +59,8 @@ export const TaskCardsList = () => {
                     sx={{
                         fontWeight: "bold",
                         [theme.breakpoints.down('sm')]: {
-                            fontSize: "large"
+                            fontSize: "large",
+                            padding: "0 1.5rem"
                         }
                 }}
                 >

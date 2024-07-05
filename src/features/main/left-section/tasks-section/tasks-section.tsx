@@ -1,4 +1,4 @@
-import React, {Fragment, useMemo} from "react";
+import React, {Fragment, useCallback, useMemo} from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
@@ -32,6 +32,10 @@ export const TasksSection = (props: TasksSectionProps) => {
     const showSkeleton = useMemo(() => {
         return loading && isLoggedIn;
     }, [loading, isLoggedIn]);
+
+    const sortByPriority = useMemo(() => {
+        return [...tasks].sort((a, b) => +b.priority - +a.priority);
+    }, [tasks]);
 
     return (
         <Box sx={{width: "100%"}}>
@@ -77,7 +81,8 @@ export const TasksSection = (props: TasksSectionProps) => {
                                 </Typography>
                             </Box>
                         )}
-                        {tasks.map((task) => (
+
+                        {sortByPriority.map((task) => (
                             <Tooltip title={task.name} placement="right" key={task.id} arrow>
                                 <NavLink
                                     to={active ? `/tasks/${task.id}` : `/activity/${task.id}`}
