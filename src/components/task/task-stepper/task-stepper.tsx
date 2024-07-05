@@ -67,6 +67,7 @@ export const TaskStepper = (props: TaskStepperProps) => {
                             {...labelProps}
                             sx={{
                                 maxWidth: screenSizes.isSmall ? "8rem" : "none",
+                                textAlign: "center",
                                 [theme.breakpoints.down('sm')]: {
                                     flexDirection: "column",
                                     gap: "0.5rem"

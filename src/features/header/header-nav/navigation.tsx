@@ -280,7 +280,7 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
                     >
                         <HeaderSearch searchToggle={searchToggle} setSearchToggle={setSearchToggle}/>
 
-                        {(!searchToggle && !screenSizes.isSmall) && (
+                        {(searchToggle || !screenSizes.isSmall) && (
                             <FormControlLabel
                                 control={
                                     <ThemeSwitch
@@ -296,7 +296,7 @@ export const Navigation: React.FC<NavigationProps> = ({isLoggedIn}) => {
                             />
                         )}
 
-                        {(!searchToggle && !screenSizes.isSmall) && (
+                        {(searchToggle || !screenSizes.isSmall) && (
                             <Box sx={{flexGrow: 0}}>
                                 <Tooltip title="Open settings">
                                     {isLoggedIn ? (
