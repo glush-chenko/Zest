@@ -24,9 +24,8 @@ Zest is a powerful React-based application that helps you increase your producti
 
 To get started with Zest, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/your-username/Zest.git`
+1. Clone the repository: `git clone git@github.com:glush-chenko/Zest.git`
 2. Install dependencies: `npm install`
-3. Configure the Todoist API credentials: Create a `.env` file in the root directory and add your Todoist API key.
 4. Start the development server: `npm start`
 5. Open the application in your browser: `http://localhost:3000`
 
